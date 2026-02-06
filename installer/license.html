@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Core OS License</title>
+    <style>
+        body {
+            background: #0a0e16;
+            color: white;
+            font-family: sans-serif;
+            padding: 40px;
+        }
+
+        .box {
+            border: 1px solid #2a2f3a;
+            height: 320px;
+            overflow-y: scroll;
+            padding: 15px;
+            background: #05080f;
+            font-size: 14px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 24px;
+            background: #2aa9ff;
+            border: none;
+            color: white;
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+            button.enabled {
+                opacity: 1;
+                cursor: pointer;
+            }
+
+        .footer {
+            margin-top: 10px;
+            font-size: 11px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Core OS Developer License Agreement</h2>
+
+    <div class="box" id="license">
+        <p>This Core OS Developer Build (“Software”) is provided exclusively for authorized developers for internal testing, evaluation, and development purposes.</p>
+
+        <p>The Software is not intended for public release, commercial deployment, or use in production environments. Ownership of all intellectual property remains with Core Systems.</p>
+
+        <p>You may not distribute, sublicense, reverse engineer, decompile, or modify the Software except where prohibited by applicable law.</p>
+
+        <p>The Software may contain experimental, incomplete, or unstable features. Use of this Software may result in system instability, data loss, or undefined behavior.</p>
+
+        <p>This Developer Build operates with elevated privileges and bypasses standard consumer-level safeguards. You agree to operate the Software only in controlled, non-critical environments.</p>
+
+        <p>Telemetry and external communication are disabled by default; however, internal diagnostic logs may be generated locally.</p>
+
+        <p>Support, updates, and compatibility are not guaranteed and may be altered or discontinued at any time.</p>
+
+        <p>Violation of these terms may result in immediate revocation of developer access and termination of this license.</p>
+
+        <p>By continuing, you confirm that you are an authorized developer and agree to all terms of this agreement.</p>
+    </div>
+
+    <button id="btn">Accept & Continue</button>
+
+    <div class="footer">
+        Build ID: COS-DEV-2411<br>
+        License Hash: 9F3A-7C2D-88A1-DEV
+    </div>
+
+    <script>
+        const box = document.getElementById("license");
+        const btn = document.getElementById("btn");
+
+        box.addEventListener("scroll", () => {
+            if (box.scrollTop + box.clientHeight >= box.scrollHeight - 5) {
+                btn.classList.add("enabled");
+            }
+        });
+
+        btn.onclick = () => {
+            if (!btn.classList.contains("enabled")) return;
+            location.href = "install.html";
+        };
+    </script>
+</body>
+</html>

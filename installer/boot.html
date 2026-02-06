@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Core Firmware</title>
+    <style>
+        body {
+            background: black;
+            color: #00ffcc;
+            font-family: Consolas, monospace;
+            font-size: 14px;
+            padding: 20px;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: #00ffcc;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+<pre id="out"></pre><span class="cursor"></span>
+
+    <script>
+        const lines = [
+            "Core Firmware v2.31 (DEV)",
+            "Copyright (c) Core Systems",
+            "",
+            "CPU Check .......... OK",
+            "Memory Check ....... OK",
+            "Secure Boot ........ ENABLED",
+            "I/O Devices ........ READY",
+            "",
+            "Launching Core OS Bootloader..."
+        ];
+
+        let i = 0;
+        const out = document.getElementById("out");
+
+        const t = setInterval(() => {
+            out.textContent += lines[i] + "\n";
+            i++;
+            if (i === lines.length) clearInterval(t);
+        }, 500);
+    </script>
+</body>
+</html>

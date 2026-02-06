@@ -214,8 +214,7 @@ app.on("web-contents-created", (_, contents) => {
 // 1. Handle File System Requests
 ipcMain.handle('fs-read-dir', async (event, dirPath) => {
     try {
-        // VIRTUAL ROOT (shows drives)
-        if (!dirPath || dirPath === "__ROOT__") {
+        if (dirPath === "__ROOT__") {
             const drives = [];
             for (let i = 65; i <= 90; i++) {
                 const drive = String.fromCharCode(i) + ":\\";
@@ -232,10 +231,11 @@ ipcMain.handle('fs-read-dir', async (event, dirPath) => {
             return { path: "__ROOT__", files: drives };
         }
 
-        const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+        const resolvedPath = dirPath && dirPath.trim() ? dirPath : os.homedir();
+        const entries = fs.readdirSync(resolvedPath, { withFileTypes: true });
 
         const files = entries.map(entry => {
-            const fullPath = path.join(dirPath, entry.name);
+            const fullPath = path.join(resolvedPath, entry.name);
             let stats = {};
             try { stats = fs.statSync(fullPath); } catch { }
 
@@ -253,7 +253,7 @@ ipcMain.handle('fs-read-dir', async (event, dirPath) => {
             return a.isDirectory ? -1 : 1;
         });
 
-        return { path: dirPath, files };
+        return { path: resolvedPath, files };
     } catch (e) {
         return { error: e.message };
     }
@@ -262,6 +262,7 @@ ipcMain.handle('fs-read-dir', async (event, dirPath) => {
 ipcMain.handle("fs-special-paths", () => {
     return {
         root: "__ROOT__",
+        home: os.homedir(),
         downloads: app.getPath("downloads"),
         documents: app.getPath("documents"),
         desktop: app.getPath("desktop")
@@ -270,6 +271,9 @@ ipcMain.handle("fs-special-paths", () => {
 
 // 2. Open File (Launch in default OS app)
 ipcMain.handle('fs-open', async (event, filePath) => {
+    if (path.extname(filePath).toLowerCase() === ".exe" && process.platform !== "win32") {
+        return "Executable files (.exe) can only be run on Windows hosts.";
+    }
     return shell.openPath(filePath);
 });
 

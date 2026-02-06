@@ -1,0 +1,3318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core OS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-os: #050505;
+            --bg-panel: rgba(20, 20, 23, 0.75);
+            --bg-window: #09090b;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(255, 255, 255, 0.15);
+            --accent: #6366f1; /* Indigo */
+            --accent-hover: #4f46e5;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+            --font-ui: 'Inter', system-ui, sans-serif;
+            --radius-win: 10px;
+            --shadow-win: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            /* Default Glass Settings */
+            --glass-blur: 20px;
+            --glass-opacity: 0.6;
+            --glass-saturation: 180%;
+        }
+
+        /* --- GLOBAL RESET --- */
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            scrollbar-width: thin;
+            scrollbar-color: #333 transparent;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            color: var(--text-main);
+            font-family: var(--font-ui);
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 3px;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #444;
+            }
+
+        /* --- UTILS --- */
+        .hidden {
+            display: none !important;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-col {
+            flex-direction: column;
+        }
+
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .scale-up {
+            animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleUp {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* --- BOOT & LOGIN --- */
+        #boot-layer {
+            position: absolute;
+            inset: 0;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #login-screen {
+            position: absolute;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') center/cover;
+            z-index: 5000;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-card {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            text-align: center;
+            width: 320px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            /* The "Liquid Glass" Effect */
+            backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation)) !important;
+            background: rgba(20, 20, 25, var(--glass-opacity)) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--accent);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            border: 2px solid white;
+        }
+
+        .login-input {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid transparent;
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: white;
+            width: 100%;
+            margin-top: 15px;
+            outline: none;
+            transition: 0.2s;
+            text-align: center;
+        }
+
+            .login-input:focus {
+                border-color: var(--accent);
+                background: rgba(255,255,255,0.15);
+            }
+
+        /* --- TOP BAR MENUS --- */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 25px;
+            left: 0;
+            background-color: #18181b;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            z-index: 3000;
+        }
+
+            .dropdown-content div {
+                color: #e4e4e7;
+                padding: 8px 12px;
+                text-decoration: none;
+                display: block;
+                font-size: 13px;
+                cursor: pointer;
+            }
+
+                .dropdown-content div:hover {
+                    background-color: var(--accent);
+                    color: white;
+                }
+
+            .dropdown-content .sep {
+                height: 1px;
+                background: #333;
+                margin: 4px 0;
+                padding: 0;
+            }
+
+        .show {
+            display: block;
+        }
+
+        /* --- FILE EXPLORER APP --- */
+        .explorer-layout {
+            display: flex;
+            height: 100%;
+            flex-direction: column;
+        }
+
+        .explorer-toolbar {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            background: #18181b;
+        }
+
+        .explorer-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: #a1a1aa;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+            .explorer-btn:hover {
+                background: rgba(255,255,255,0.1);
+                color: white;
+            }
+
+        .explorer-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .explorer-sidebar {
+            width: 150px;
+            background: rgba(0,0,0,0.3);
+            border-right: 1px solid var(--border);
+            padding: 10px;
+        }
+
+        .explorer-main {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 15px;
+        }
+
+        .file-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+            .file-icon:hover {
+                background: rgba(255,255,255,0.05);
+            }
+
+            .file-icon.selected {
+                background: rgba(99, 102, 241, 0.3);
+                border: 1px solid var(--accent);
+            }
+
+        .f-img {
+            font-size: 32px;
+            color: #fbbf24;
+        }
+        /* Folder Color */
+        .f-name {
+            font-size: 12px;
+            text-align: center;
+            word-break: break-all;
+        }
+
+        /* --- DESKTOP --- */
+        #desktop {
+            position: absolute;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop') center/cover;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        #top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: rgba(9, 9, 11, 0.4);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            font-size: 13px;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            z-index: 2000;
+            /* The "Liquid Glass" Effect */
+            backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation)) !important;
+            background: rgba(20, 20, 25, var(--glass-opacity)) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .top-left {
+            display: flex;
+            gap: 15px;
+        }
+
+        .top-right {
+            display: flex;
+            gap: 15px;
+        }
+
+        .menu-item:hover {
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Dock */
+        #dock-container {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+        }
+
+        .dock {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(20, 20, 25, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 18px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transition: width 0.2s;
+            /* The "Liquid Glass" Effect */
+            backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation)) !important;
+            background: rgba(20, 20, 25, var(--glass-opacity)) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .app-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: #27272a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #e4e4e7;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+            .app-icon:hover {
+                transform: translateY(-8px) scale(1.1);
+                margin: 0 5px;
+                z-index: 10;
+                box-shadow: 0 10px 15px rgba(0,0,0,0.5);
+            }
+
+            .app-icon.active::after {
+                content: '';
+                position: absolute;
+                bottom: -6px;
+                width: 5px;
+                height: 5px;
+                background: white;
+                border-radius: 50%;
+            }
+
+        /* --- DEVTOYS STYLES --- */
+        .devtoys-layout {
+            display: flex;
+            height: 100%;
+        }
+
+        .devtoys-sidebar {
+            width: 140px;
+            background: rgba(0,0,0,0.3);
+            border-right: 1px solid var(--border);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .tool-btn {
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #a1a1aa;
+            transition: 0.2s;
+        }
+
+            .tool-btn:hover {
+                background: rgba(255,255,255,0.05);
+                color: white;
+            }
+
+            .tool-btn.active {
+                background: var(--accent);
+                color: white;
+            }
+
+        .devtoys-main {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .tool-view {
+            display: none;
+            height: 100%;
+            flex-direction: column;
+        }
+
+            .tool-view.active {
+                display: flex;
+            }
+
+        .dt-textarea {
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--font-mono);
+            padding: 10px;
+            font-family: var(--font-mono);
+            resize: none;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        /* Icons Colors */
+        .icon-term {
+            background: linear-gradient(135deg, #1f2937, #111827);
+            color: #10b981;
+        }
+
+        .icon-code {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            color: white;
+        }
+
+        .icon-git {
+            background: linear-gradient(135deg, #f97316, #c2410c);
+            color: white;
+        }
+
+        .icon-browser {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            color: white;
+        }
+
+        .icon-settings {
+            background: linear-gradient(135deg, #4b5563, #374151);
+            color: #e5e7eb;
+        }
+
+        /* --- WINDOW SYSTEM --- */
+        .window {
+            position: absolute;
+            background: var(--bg-window);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-win);
+            box-shadow: var(--shadow-win);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 300px;
+            min-height: 200px;
+            animation: scaleUp 0.25s;
+            resize: both;
+            /* The "Liquid Glass" Effect */
+            backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation)) !important;
+            background: rgba(20, 20, 25, var(--glass-opacity)) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            .window.maximized {
+                top: 30px !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: calc(100% - 30px) !important;
+                border-radius: 0;
+                resize: none;
+            }
+
+        .title-bar {
+            height: 38px;
+            background: #121214;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            justify-content: space-between;
+            cursor: default;
+        }
+
+        .traffic-lights {
+            display: flex;
+            gap: 8px;
+        }
+
+        .traffic-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 0.1s;
+            position: relative;
+        }
+
+            .traffic-light:hover {
+                filter: brightness(0.8);
+            }
+
+        .tf-close {
+            background: #ff5f56;
+        }
+
+        .tf-min {
+            background: #ffbd2e;
+        }
+
+        .tf-max {
+            background: #27c93f;
+        }
+
+        .win-title {
+            font-size: 13px;
+            color: #a1a1aa;
+            pointer-events: none;
+            flex-grow: 1;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .window-content {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- APP SPECIFIC STYLES --- */
+
+        /* Terminal */
+        .terminal-container {
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            background: rgba(0,0,0,0.95);
+            height: 100%;
+            overflow-y: auto;
+            color: #d1d5db;
+        }
+
+        .term-output {
+            white-space: pre-wrap;
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .term-input-line {
+            display: flex;
+            align-items: center;
+        }
+
+        .term-prompt {
+            color: var(--success);
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .term-input {
+            background: transparent;
+            border: none;
+            color: white;
+            flex: 1;
+            outline: none;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        /* VS Code / Editor */
+        .editor-layout {
+            display: flex;
+            height: 100%;
+        }
+
+        .editor-sidebar {
+            width: 180px;
+            background: #121214;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #71717a;
+            letter-spacing: 0.5px;
+        }
+
+        .file-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .file-item {
+            padding: 4px 10px;
+            color: #a1a1aa;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 4px;
+        }
+
+            .file-item:hover {
+                background: #27272a;
+                color: white;
+            }
+
+            .file-item.active {
+                background: #27272a;
+                color: var(--accent);
+            }
+
+        .editor-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #09090b;
+        }
+
+        .editor-tabs {
+            display: flex;
+            background: #121214;
+            overflow-x: auto;
+            height: 36px;
+        }
+
+        .editor-tab {
+            padding: 0 15px;
+            border-right: 1px solid #1f1f22;
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            color: #71717a;
+            cursor: pointer;
+            min-width: 100px;
+            justify-content: space-between;
+        }
+
+            .editor-tab.active {
+                background: #09090b;
+                color: #e4e4e7;
+                border-top: 2px solid var(--accent);
+            }
+
+        .code-area {
+            flex: 1;
+            background: transparent;
+            color: #e4e4e7;
+            border: none;
+            outline: none;
+            padding: 15px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            resize: none;
+            white-space: pre;
+            line-height: 1.5;
+            tab-size: 2;
+        }
+
+        /* Git Client */
+        .git-ui {
+            padding: 20px;
+            color: var(--text-main);
+        }
+
+        .git-stat {
+            background: #18181b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .branch-badge {
+            background: #27272a;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--accent);
+        }
+
+        /* Start Menu */
+        #start-menu {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            width: 500px;
+            height: 400px;
+            background: rgba(24, 24, 27, 0.85);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            z-index: 2001;
+            /* The "Liquid Glass" Effect */
+            backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation)) !important;
+            background: rgba(20, 20, 25, var(--glass-opacity)) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            #start-menu.open {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+                pointer-events: all;
+            }
+
+        .search-bar {
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            border-radius: 8px;
+            padding: 10px 15px;
+            color: white;
+            width: 100%;
+            outline: none;
+            margin-bottom: 20px;
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .grid-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+            .grid-item:hover {
+                background: rgba(255,255,255,0.05);
+            }
+
+        /* --- NEW APPS STYLES --- */
+
+        /* AI Assistant */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: #18181b;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .msg {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+            .msg.user {
+                align-self: flex-end;
+                background: var(--accent);
+                color: white;
+                border-bottom-right-radius: 2px;
+            }
+
+            .msg.ai {
+                align-self: flex-start;
+                background: #27272a;
+                color: #e4e4e7;
+                border-bottom-left-radius: 2px;
+                border: 1px solid var(--border);
+            }
+
+        .chat-input-area {
+            padding: 15px;
+            border-top: 1px solid var(--border);
+            background: #09090b;
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Browser */
+        .browser-bar {
+            display: flex;
+            gap: 10px;
+            padding: 8px;
+            background: #27272a;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .url-input {
+            flex: 1;
+            background: #09090b;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 5px 15px;
+            color: white;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .browser-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+            transition: opacity 0.3s; /* Smooth fade in */
+        }
+
+        .browser-loading {
+            height: 2px;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.5s;
+        }
+
+        /* Settings Grid */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .slider-container {
+            margin-bottom: 15px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #a1a1aa;
+            margin-bottom: 5px;
+        }
+
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--accent);
+        }
+
+            .color-swatch {
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+            .color-swatch:hover {
+                transform: scale(1.05);
+            }
+
+        /* Toast Notification */
+        #toast-area {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: #18181b;
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 8px;
+            width: 300px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Context Menu */
+        #context-menu {
+            position: absolute;
+            background: #18181b;
+            border: 1px solid var(--border);
+            width: 180px;
+            border-radius: 6px;
+            padding: 5px;
+            z-index: 9999;
+            display: none;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .ctx-item {
+            padding: 8px 12px;
+            font-size: 13px;
+            color: #e4e4e7;
+            cursor: pointer;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+            .ctx-item:hover {
+                background: var(--accent);
+                color: white;
+            }
+
+        .ctx-sep {
+            height: 1px;
+            background: #27272a;
+            margin: 4px 0;
+        }
+
+        /* Syntax Highlight Simulation */
+        .token-kw {
+            color: #c792ea;
+        }
+        /* Keywords */
+        .token-str {
+            color: #c3e88d;
+        }
+        /* Strings */
+        .token-fn {
+            color: #82aaff;
+        }
+        /* Functions */
+
+        /* --- APP: REQUEST (API Client) --- */
+        .req-bar {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: #18181b;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .req-method {
+            background: #27272a;
+            color: var(--accent);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0 10px;
+            font-weight: bold;
+            outline: none;
+        }
+
+        .req-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .req-input-pane, .req-res-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+        }
+
+        .req-res-pane {
+            border-left: 1px solid var(--border);
+            background: rgba(0,0,0,0.2);
+        }
+
+        /* --- APP: SQL STUDIO --- */
+        .sql-layout {
+            display: flex;
+            height: 100%;
+        }
+
+        .sql-sidebar {
+            width: 150px;
+            background: #121214;
+            border-right: 1px solid var(--border);
+            padding: 10px;
+        }
+
+        .sql-table-item {
+            padding: 8px;
+            color: #a1a1aa;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .sql-table-item:hover {
+                color: white;
+                background: rgba(255,255,255,0.05);
+                border-radius: 4px;
+            }
+
+        .sql-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #09090b;
+        }
+
+        .sql-query-area {
+            height: 120px;
+            background: #18181b;
+            border-bottom: 1px solid var(--border);
+            padding: 10px;
+        }
+
+        .sql-results {
+            flex: 1;
+            overflow: auto;
+            padding: 0;
+        }
+
+        table.sql-grid {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .sql-grid th, .sql-grid td {
+            text-align: left;
+            padding: 8px 12px;
+            border-bottom: 1px solid #27272a;
+            color: #d4d4d8;
+        }
+
+        .sql-grid th {
+            background: #1f1f22;
+            color: #a1a1aa;
+            position: sticky;
+            top: 0;
+        }
+
+        /* --- APP: MARKTEXT (Markdown) --- */
+        .md-editor {
+            flex: 1;
+            background: #121214;
+            border: none;
+            color: #e4e4e7;
+            padding: 20px;
+            font-family: var(--font-mono);
+            resize: none;
+            outline: none;
+            line-height: 1.6;
+        }
+
+        .md-preview {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #09090b;
+            border-left: 1px solid var(--border);
+            color: #d4d4d8;
+            font-family: var(--font-ui);
+            line-height: 1.6;
+        }
+
+            .md-preview h1, .md-preview h2 {
+                border-bottom: 1px solid #3f3f46;
+                padding-bottom: 5px;
+                color: white;
+            }
+
+            .md-preview code {
+                background: #27272a;
+                padding: 2px 5px;
+                border-radius: 4px;
+                font-family: var(--font-mono);
+                color: var(--accent);
+            }
+
+            .md-preview blockquote {
+                border-left: 3px solid var(--accent);
+                margin: 0;
+                padding-left: 15px;
+                color: #a1a1aa;
+            }
+
+        /* --- FIX DROPDOWN COLORS --- */
+        select.login-input {
+            background-color: #18181b; /* Dark background */
+            color: white; /* White text */
+        }
+
+            /* This targets the actual dropdown list popup */
+            select.login-input option {
+                background-color: #18181b;
+                color: white;
+            }
+
+        /* --- SCREENSAVER (Matrix Rain) --- */
+        #screensaver {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: black;
+            z-index: 9999;
+            display: none; /* Hidden by default */
+            pointer-events: none; /* Let clicks pass through if needed, but usually we wake up */
+        }
+
+        /* --- THEME STORE --- */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            padding: 10px;
+        }
+
+        .theme-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+        }
+
+            .theme-card:hover {
+                transform: translateY(-2px);
+                border-color: var(--accent);
+                background: rgba(255,255,255,0.1);
+            }
+
+        .theme-preview {
+            height: 60px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-name {
+            font-size: 13px;
+            font-weight: bold;
+            color: #f4f4f5;
+        }
+
+        /* --- ADD TO CSS --- */
+
+        /* Desktop Shortcuts */
+        #shortcut-area {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .shortcut {
+            position: absolute;
+            width: 80px;
+            height: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            pointer-events: auto; /* Re-enable clicks */
+            color: white;
+            text-align: center;
+        }
+
+            .shortcut:hover {
+                background: rgba(255,255,255,0.1);
+            }
+
+            .shortcut:active {
+                background: rgba(99, 102, 241, 0.3);
+                border: 1px solid var(--accent);
+            }
+
+        .s-icon {
+            font-size: 32px;
+            margin-bottom: 5px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
+
+        .s-name {
+            font-size: 11px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            word-break: break-word;
+            line-height: 1.2;
+        }
+
+        /* Context Menu */
+        #context-menu {
+            position: absolute;
+            display: none;
+            background: #18181b;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 5px;
+            min-width: 150px;
+            z-index: 9999;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.5);
+        }
+
+        .ctx-item {
+            padding: 8px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            color: #e4e4e7;
+            border-radius: 4px;
+        }
+
+            .ctx-item:hover {
+                background: var(--accent);
+                color: white;
+            }
+
+        /* Drag Ghost (Visual helper when dragging) */
+        #drag-ghost {
+            position: fixed;
+            top: -100px;
+            left: -100px;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.8;
+            background: #333;
+            border: 1px solid white;
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #trash-bin {
+            transition: transform 0.2s, background 0.2s;
+        }
+            /* Visual feedback when dragging over trash */
+            #trash-bin.drag-over {
+                transform: scale(1.3);
+                background: #ff0000 !important;
+                box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+            }
+
+    </style>
+</head>
+<body>
+    <canvas id="screensaver"></canvas>
+
+    <div id="boot-layer">
+        <div class="spinner"></div>
+        <h3 style="margin-top: 20px; font-weight: 300; letter-spacing: 2px;">CORE<span style="font-weight:700">OS</span></h3>
+        <p style="color: #52525b; font-size: 12px;">Initializing Kernel v4.2.0...</p>
+    </div>
+
+    <div id="login-screen" class="hidden flex-center flex-col">
+        <div class="login-card">
+            <div class="avatar"><i class="fa-solid fa-user-astronaut"></i></div>
+            <h2 style="margin: 0;">Senior Dev</h2>
+            <p style="color: #a1a1aa; font-size: 0.9rem;">Core OS Security</p>
+            <input type="password" id="password-input" class="login-input" placeholder="Enter Password (any)" onkeypress="checkLogin(event)">
+        </div>
+    </div>
+
+    <div id="drag-ghost">
+        <div id="ghost-icon" style="font-size: 24px; margin-bottom:5px;"></div>
+        <div id="ghost-name" style="font-size: 12px;"></div>
+    </div>
+
+    <div id="context-menu"></div>
+
+    <div id="shortcut-area"></div>
+
+    <div id="desktop" class="hidden" oncontextmenu="handleRightClick(event)" onclick="hideContextMenu()">
+
+        <div id="top-bar">
+            <div class="top-left">
+                <span class="menu-item"><i class="fa-solid fa-bell"></i></span>
+                <span class="menu-item" style="font-weight: 700;">Core OS</span>
+
+                <div class="dropdown">
+                    <span class="menu-item" onclick="toggleMenu('menu-file')">File</span>
+                    <div id="menu-file" class="dropdown-content">
+                        <div onclick="appManager.open('code')">New File</div>
+                        <div onclick="fileSystem.saveSystem()">Save System State</div>
+                        <div class="sep"></div>
+                        <div onclick="window.close()">Shut Down</div>
+                    </div>
+                </div>
+
+                <div class="dropdown">
+                    <span class="menu-item" onclick="toggleMenu('menu-edit')">Edit</span>
+                    <div id="menu-edit" class="dropdown-content">
+                        <div onclick="notifications.show('Undo not implemented', 'warning')">Undo</div>
+                        <div class="sep"></div>
+                        <div onclick="notifications.show('Copied', 'success')">Copy</div>
+                        <div onclick="notifications.show('Pasted', 'success')">Paste</div>
+                    </div>
+                </div>
+
+                <div class="dropdown">
+                    <span class="menu-item" onclick="toggleMenu('menu-view')">View</span>
+                    <div id="menu-view" class="dropdown-content">
+                        <div onclick="document.documentElement.requestFullscreen()">Enter Fullscreen</div>
+                        <div onclick="document.exitFullscreen()">Exit Fullscreen</div>
+                        <div class="sep"></div>
+                        <div onclick="location.reload()">Refresh UI</div>
+                    </div>
+                </div>
+
+                <div class="dropdown">
+                    <span class="menu-item" onclick="toggleMenu('menu-tools')">Tools</span>
+                    <div id="menu-tools" class="dropdown-content">
+                        <div onclick="appManager.open('terminal')">Terminal</div>
+                        <div onclick="appManager.open('settings')">Settings</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="top-right">
+                <span class="menu-item"><i class="fa-solid fa-wifi"></i></span>
+                <span class="menu-item"><i class="fa-solid fa-battery-full"></i></span>
+                <span class="menu-item" id="clock">12:00</span>
+            </div>
+        </div>
+
+        <div id="start-menu">
+            <input type="text" class="search-bar" placeholder="Search apps, files, or commands...">
+            <div style="font-size: 12px; color: #71717a; margin-bottom: 10px;">PINNED APPS</div>
+            <div class="app-grid">
+                <div class="grid-item" onclick="appManager.open('terminal'); toggleStartMenu()">
+                    <div style="width:40px; height:40px; background:#111827; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#10b981;"><i class="fa-solid fa-terminal"></i></div>
+                    <span style="font-size:12px;">Terminal</span>
+                </div>
+                <div class="grid-item" onclick="appManager.open('code'); toggleStartMenu()">
+                    <div style="width:40px; height:40px; background:#1e40af; border-radius:8px; display:flex; align-items:center; justify-content:center; color:white;"><i class="fa-solid fa-code"></i></div>
+                    <span style="font-size:12px;">VS Code</span>
+                </div>
+                <div class="grid-item" onclick="appManager.open('git'); toggleStartMenu()">
+                    <div style="width:40px; height:40px; background:#c2410c; border-radius:8px; display:flex; align-items:center; justify-content:center; color:white;"><i class="fa-brands fa-git-alt"></i></div>
+                    <span style="font-size:12px;">GitLens</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="dock-container">
+            <div class="dock">
+                <div class="app-icon" onclick="toggleStartMenu()" style="background:#333;"><i class="fa-brands fa-windows"></i></div>
+                <div style="width:1px; background:rgba(255,255,255,0.1); margin:0 5px;"></div>
+                <div class="app-icon icon-term" onclick="appManager.open('terminal')" id="dock-terminal"><i class="fa-solid fa-terminal"></i></div>
+                <div class="app-icon icon-code" onclick="appManager.open('code')" id="dock-code"><i class="fa-solid fa-code"></i></div>
+                <div class="app-icon icon-git" onclick="appManager.open('git')" id="dock-git"><i class="fa-brands fa-git-alt"></i></div>
+                <div class="app-icon" style="background: linear-gradient(135deg, #fbbf24, #d97706); color:white;" onclick="appManager.open('explorer')" id="dock-explorer">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <div class="app-icon" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); color:white;" onclick="appManager.open('ai')" id="dock-ai"><i class="fa-solid fa-robot"></i></div>
+                <div class="app-icon icon-browser" onclick="appManager.open('browser')" id="dock-browser"><i class="fa-brands fa-chrome"></i></div>
+                <div class="app-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706); color:white;" onclick="appManager.open('devtoys')" id="dock-devtoys"><i class="fa-solid fa-toolbox"></i></div>
+                <div class="app-icon" style="background: linear-gradient(135deg, #FF6B6B, #EE5253); color:white;" onclick="appManager.open('request')" id="dock-request"><i class="fa-solid fa-satellite-dish"></i></div>
+                <div class="app-icon" style="background: linear-gradient(135deg, #48dbfb, #0abde3); color:white;" onclick="appManager.open('sql')" id="dock-sql"><i class="fa-solid fa-database"></i></div>
+                <div class="app-icon" style="background: linear-gradient(135deg, #feca57, #ff9f43); color:white;" onclick="appManager.open('markdown')" id="dock-markdown"><i class="fa-brands fa-markdown"></i></div>
+                <div class="app-icon" style="background: linear-gradient(135deg, #a8a29e, #78716c); color:white;" onclick="appManager.open('themes')" id="dock-themes"><i class="fa-solid fa-palette"></i></div>
+                <div class="app-icon icon-settings" onclick="appManager.open('settings')" id="dock-settings"><i class="fa-solid fa-gear"></i></div>
+                <div id="trash-bin" class="app-icon" style="background: linear-gradient(135deg, #ef4444, #991b1b); margin-left: 20px;">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-terminal" class="window hidden" style="left: 100px; top: 80px; width: 600px; height: 400px;">
+            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-terminal')">
+                <div class="traffic-lights">
+                    <div class="traffic-light tf-close" onclick="appManager.close('terminal')"></div>
+                    <div class="traffic-light tf-min" onclick="appManager.minimize('terminal')"></div>
+                    <div class="traffic-light tf-max" onclick="appManager.maximize('terminal')"></div>
+                </div>
+                <div class="win-title">user@core-os: ~</div>
+            </div>
+            <div class="window-content">
+                <div class="terminal-container" id="term-body" onclick="document.getElementById('term-input').focus()">
+                    <div class="term-output">Core OS Kernel v4.2.0 initialized.</div>
+                    <div class="term-output" style="margin-bottom: 10px; color: #a1a1aa;">Type 'help' for commands.</div>
+                    <div class="term-input-line">
+                        <span class="term-prompt">user@core:~$</span>
+                        <input type="text" id="term-input" class="term-input" autocomplete="off" spellcheck="false">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-code" class="window hidden" style="left: 150px; top: 100px; width: 800px; height: 500px;">
+            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-code')">
+                <div class="traffic-lights">
+                    <div class="traffic-light tf-close" onclick="appManager.close('code')"></div>
+                    <div class="traffic-light tf-min"></div>
+                    <div class="traffic-light tf-max"></div>
+
+                    <div class="traffic-light tf-min" onclick="appManager.minimize('code')"></div>
+                    <div class="traffic-light tf-max" onclick="appManager.maximize('code')"></div>
+                </div>
+                <div class="win-title">DevStudio</div>
+            </div>
+            <div class="window-content">
+                <div class="editor-layout">
+                    <div class="editor-sidebar">
+                        <div class="sidebar-header">EXPLORER</div>
+                        <div class="file-list" id="editor-file-list">
+                        </div>
+                    </div>
+                    <div class="editor-main">
+                        <div class="editor-tabs" id="editor-tabs">
+                        </div>
+                        <textarea id="code-area" class="code-area" oninput="fileSystem.saveCurrentFile()"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-git" class="window hidden" style="left: 400px; top: 200px; width: 500px; height: 350px;">
+            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-git')">
+                <div class="traffic-lights">
+                    <div class="traffic-light tf-close" onclick="appManager.close('git')"></div>
+                    <div class="traffic-light tf-min" onclick="appManager.minimize('git')"></div>
+                </div>
+                <div class="win-title">GitLens</div>
+            </div>
+            <div class="window-content" style="background: #121214;">
+                <div class="git-ui">
+                    <h3>Source Control</h3>
+                    <div class="git-stat">
+                        <span><i class="fa-solid fa-code-branch"></i> Current Branch</span>
+                        <span class="branch-badge">main</span>
+                    </div>
+                    <div style="font-size: 12px; color: #a1a1aa; margin-bottom: 10px;">CHANGES</div>
+                    <div id="git-changes">
+                        <div style="padding: 10px; border: 1px dashed #333; text-align: center; border-radius: 6px;">No changes detected</div>
+                    </div>
+                    <button style="width: 100%; margin-top: 20px; padding: 8px; background: var(--accent); border: none; color: white; border-radius: 4px; cursor: pointer;" onclick="notifications.show('Committed to main', 'success')">Commit & Push</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-explorer" class="window hidden" style="left: 100px; top: 100px; width: 700px; height: 500px;">
+            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-explorer')">
+                <div class="traffic-lights">
+                    <div class="traffic-light tf-close" onclick="appManager.close('explorer')"></div>
+                    <div class="traffic-light tf-max" onclick="appManager.maximize('explorer')"></div>
+                </div>
+                <div class="win-title">File Explorer</div>
+            </div>
+            <div class="window-content explorer-layout">
+                <div class="explorer-toolbar">
+                    <div style="padding:8px; background:rgba(0,0,0,0.3); display:flex; gap:10px; border-bottom:1px solid var(--border);">
+                        <button onclick="explorerApp.goUp()" style="background:transparent; border:1px solid var(--border); color:white; border-radius:4px; cursor:pointer;"><i class="fa-solid fa-arrow-up"></i></button>
+                        <button onclick="explorerApp.newFolder()" style="background:transparent; border:1px solid var(--border); color:white; border-radius:4px; cursor:pointer;"><i class="fa-solid fa-folder-plus"></i></button>
+                        <button onclick="explorerApp.newFile()" style="background:transparent; border:1px solid var(--border); color:white; border-radius:4px; cursor:pointer;"><i class="fa-solid fa-file-circle-plus"></i></button>
+                        <input id="exp-path" type="text" style="flex:1; background:rgba(0,0,0,0.5); border:none; color:white; padding:4px 8px; border-radius:4px; font-size:12px;" readonly>
+                        </div>
+                    </div>
+                    <div class="explorer-body">
+                        <div class="explorer-sidebar">
+                            <div class="file-item" onclick="explorerApp.navigate('__ROOT__')">
+                                <i class="fa-solid fa-hard-drive"></i> Root (C:)
+                            </div>
+
+                            <div class="file-item" onclick="explorerApp.navigate(explorerApp.special.home)">
+                                <i class="fa-solid fa-house"></i> Home
+                            </div>
+
+                            <div class="file-item" onclick="explorerApp.navigate(explorerApp.special.documents)">
+                                <i class="fa-solid fa-folder"></i> Documents
+                            </div>
+
+                            <div class="file-item" onclick="explorerApp.navigate(explorerApp.special.downloads)">
+                                <i class="fa-solid fa-download"></i> Downloads
+                            </div>
+                        </div>
+                        <div class="explorer-main">
+                            <div class="file-grid" id="file-grid">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+
+        <div id="win-ai" class="window hidden" style="left: 300px; top: 150px; width: 400px; height: 500px;">
+            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-ai')">
+                <div class="traffic-lights">
+                    <div class="traffic-light tf-close" onclick="appManager.close('ai')"></div>
+                    <div class="traffic-light tf-min" onclick="appManager.minimize('ai')"></div>
+                </div>
+                <div class="win-title">Core AI Assistant</div>
+            </div>
+            <div class="window-content">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-history">
+                        <div class="msg ai">Hello! I am Core AI. How can I help you with your code today?</div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" class="login-input" style="margin:0; text-align:left;" placeholder="Ask about Linux, JS, or Life..." onkeypress="handleAIChat(event)">
+                        <button onclick="sendAIMessage()" style="background:var(--accent); border:none; color:white; padding:0 15px; border-radius:8px; cursor:pointer;"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-browser" class="window hidden" style="left: 200px; top: 100px; width: 900px; height: 600px;">
+            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-browser')">
+                <div class="traffic-lights">
+                    <div class="traffic-light tf-close" onclick="appManager.close('browser')"></div>
+                    <div class="traffic-light tf-max" onclick="appManager.maximize('browser')"></div>
+                </div>
+                <div class="win-title">Core Navigator</div>
+            </div>
+            <div class="window-content" style="display:flex; flex-direction:column; background:#fff;">
+                <div class="browser-bar" style="background:#27272a; border-bottom:1px solid #333; padding:8px; display:flex; gap:8px; align-items:center;">
+                    <i class="fa-solid fa-arrow-left" style="color:#a1a1aa; cursor:pointer; padding:5px;" onclick="browserApp.back()"></i>
+                    <i class="fa-solid fa-arrow-right" style="color:#a1a1aa; cursor:pointer; padding:5px;" onclick="browserApp.forward()"></i>
+                    <i class="fa-solid fa-rotate-right" style="color:#a1a1aa; cursor:pointer; padding:5px;" onclick="browserApp.reload()"></i>
+
+                    <input type="text" id="browser-url" class="url-input"
+                           style="flex:1; background:#18181b; border:1px solid #3f3f46; color:white; padding:6px 15px; border-radius:15px; outline:none; font-size:13px;"
+                           value="https://www.google.com"
+                           onkeypress="browserApp.handleInput(event)">
+                </div>
+
+                <div style="height:2px; width:100%; background:#27272a;">
+                    <div id="browser-loader" style="height:100%; width:0%; background:var(--accent); transition: width 0.2s;"></div>
+                </div>
+
+                <webview id="browser-view"
+                         src="https://www.google.com"
+                         style="flex:1; width:100%; height:100%;"
+                         autosize="on"
+                         allowpopups
+                         useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36">
+                </webview>
+            </div>
+        </div>
+
+        <div id="win-settings" class="window hidden" style="left: 350px; top: 200px; width: 500px; height: 500px;">
+            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-settings')">
+                <div class="traffic-lights"><div class="traffic-light tf-close" onclick="appManager.close('settings')"></div></div>
+                <div class="win-title">System Settings</div>
+            </div>
+            <div class="window-content" style="padding:20px; overflow-y:auto;">
+
+                <h4 style="border-bottom:1px solid #333; padding-bottom:10px; margin-top:0;">Personalization</h4>
+
+                <h4 style="border-bottom:1px solid #333; padding-bottom:10px; margin-top:20px;">Sound & Media</h4>
+
+                <p style="font-size:12px; color:#a1a1aa; margin-top:10px;">Output Device</p>
+                <select id="audio-output-select" class="login-input" style="text-align:left;" onchange="audioManager.setDevice(this.value)">
+                    <option>Default Output</option>
+                </select>
+
+                <div class="slider-container" style="margin-top:15px;">
+                    <div class="slider-label"><span>Master Volume</span><span id="val-vol">100%</span></div>
+                    <input type="range" min="0" max="100" value="100" oninput="audioManager.setVolume(this.value); document.getElementById('val-vol').innerText = this.value + '%'">
+                </div>
+
+                <p style="font-size:12px; color:#a1a1aa; margin-top:10px;">Accent Color</p>
+                <div class="settings-grid">
+                    <div class="color-swatch" style="background:#6366f1" onclick="systemConfig.setAccent('#6366f1')"></div>
+                    <div class="color-swatch" style="background:#10b981" onclick="systemConfig.setAccent('#10b981')"></div>
+                    <div class="color-swatch" style="background:#ef4444" onclick="systemConfig.setAccent('#ef4444')"></div>
+                    <div class="color-swatch" style="background:#f59e0b" onclick="systemConfig.setAccent('#f59e0b')"></div>
+                    <div class="color-swatch" style="background:#ec4899" onclick="systemConfig.setAccent('#ec4899')"></div>
+                    <div class="color-swatch" style="background:#06b6d4" onclick="systemConfig.setAccent('#06b6d4')"></div>
+                </div>
+
+                <p style="font-size:12px; color:#a1a1aa; margin-top:20px;">Liquid Glass Effect</p>
+
+                <div class="slider-container">
+                    <div class="slider-label"><span>Transparency</span><span id="val-opacity">60%</span></div>
+                    <input type="range" min="10" max="100" value="60" oninput="systemConfig.setGlass('opacity', this.value)">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-label"><span>Blur Radius</span><span id="val-blur">20px</span></div>
+                    <input type="range" min="0" max="50" value="20" oninput="systemConfig.setGlass('blur', this.value)">
+                </div>
+
+                <h4 style="border-bottom:1px solid #333; padding-bottom:10px; margin-top:20px;">Typography</h4>
+                <select class="login-input" onchange="systemConfig.setFont(this.value)" style="text-align:left;">
+                    <option value="'JetBrains Mono', monospace">JetBrains Mono (Default)</option>
+                    <option value="'Fira Code', monospace">Fira Code</option>
+                    <option value="'Courier New', monospace">Courier New (Retro)</option>
+                </select>
+
+                <h4 style="border-bottom:1px solid #333; padding-bottom:10px; margin-top:20px;">System</h4>
+                <button class="login-input" style="width:auto; padding:8px 15px; margin-top:10px; background:var(--danger); border:none;" onclick="systemConfig.reset()">Factory Reset</button>
+            </div>
+        </div>
+
+        <div id="win-devtoys" class="window hidden" style="left: 250px; top: 150px; width: 700px; height: 500px;">
+            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-devtoys')">
+                <div class="traffic-lights"><div class="traffic-light tf-close" onclick="appManager.close('devtoys')"></div></div>
+                <div class="win-title">DevToys</div>
+            </div>
+            <div class="window-content">
+                <div class="devtoys-layout">
+                    <div class="devtoys-sidebar">
+                        <div class="tool-btn active" onclick="devToys.switchTab('json')">JSON Format</div>
+                        <div class="tool-btn" onclick="devToys.switchTab('base64')">Base64</div>
+                        <div class="tool-btn" onclick="devToys.switchTab('lorem')">Lorem Ipsum</div>
+                    </div>
+                    <div class="devtoys-main">
+                        <div id="tool-json" class="tool-view active">
+                            <h3 style="margin-top:0">JSON Formatter</h3>
+                            <textarea id="dt-json-input" class="dt-textarea" placeholder="Paste messy JSON here..."></textarea>
+                            <div style="margin-bottom:10px; display:flex; gap:10px;">
+                                <button class="login-input" style="width:auto; margin:0;" onclick="devToys.formatJSON()">Format</button>
+                                <button class="login-input" style="width:auto; margin:0;" onclick="devToys.minifyJSON()">Minify</button>
+                            </div>
+                            <textarea id="dt-json-output" class="dt-textarea" readonly placeholder="Pretty JSON will appear here..."></textarea>
+                        </div>
+                        <div id="tool-base64" class="tool-view">
+                            <h3 style="margin-top:0">Base64 Encoder/Decoder</h3>
+                            <textarea id="dt-b64-input" class="dt-textarea" placeholder="Type text to encode/decode..."></textarea>
+                            <div style="margin-bottom:10px; display:flex; gap:10px;">
+                                <button class="login-input" style="width:auto; margin:0;" onclick="devToys.b64Encode()">Encode</button>
+                                <button class="login-input" style="width:auto; margin:0;" onclick="devToys.b64Decode()">Decode</button>
+                            </div>
+                            <textarea id="dt-b64-output" class="dt-textarea" readonly></textarea>
+                        </div>
+                        <div id="tool-lorem" class="tool-view">
+                            <h3 style="margin-top:0">Lorem Ipsum Generator</h3>
+                            <div style="margin-bottom:15px;">
+                                <button class="login-input" style="width:auto; margin:0;" onclick="devToys.genLorem(1)">1 Para</button>
+                                <button class="login-input" style="width:auto; margin:0;" onclick="devToys.genLorem(3)">3 Paras</button>
+                                <button class="login-input" style="width:auto; margin:0;" onclick="devToys.genLorem(5)">5 Paras</button>
+                            </div>
+                            <textarea id="dt-lorem-output" class="dt-textarea" readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-request" class="window hidden" style="left: 120px; top: 120px; width: 700px; height: 500px;">
+            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-request')">
+                <div class="traffic-lights"><div class="traffic-light tf-close" onclick="appManager.close('request')"></div></div>
+                <div class="win-title">Postman Clone</div>
+            </div>
+            <div class="window-content" style="display:flex; flex-direction:column;">
+                <div class="req-bar">
+                    <select id="req-method" class="req-method">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                    </select>
+                    <input id="req-url" type="text" class="login-input" style="margin:0; text-align:left;" value="https://jsonplaceholder.typicode.com/posts/1">
+                    <button onclick="requestApp.send()" class="login-input" style="width:auto; margin:0; background:var(--accent); border:none;">Send</button>
+                </div>
+                <div class="req-body">
+                    <div class="req-input-pane">
+                        <div style="font-size:12px; color:#a1a1aa; margin-bottom:5px;">REQUEST BODY (JSON)</div>
+                        <textarea id="req-json-body" class="dt-textarea" style="background:#121214;">{ "title": "foo", "body": "bar", "userId": 1 }</textarea>
+                    </div>
+                    <div class="req-res-pane">
+                        <div style="font-size:12px; color:#a1a1aa; margin-bottom:5px; display:flex; justify-content:space-between;">
+                            <span>RESPONSE</span>
+                            <span id="req-status" style="color:var(--success);"></span>
+                        </div>
+                        <textarea id="req-response" class="dt-textarea" style="background:transparent; border:none;" readonly></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-sql" class="window hidden" style="left: 180px; top: 150px; width: 800px; height: 550px;">
+            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-sql')">
+                <div class="traffic-lights"><div class="traffic-light tf-close" onclick="appManager.close('sql')"></div></div>
+                <div class="win-title">SQL Studio</div>
+            </div>
+            <div class="window-content">
+                <div class="sql-layout">
+                    <div class="sql-sidebar">
+                        <div style="font-size:11px; font-weight:bold; color:#52525b; margin-bottom:10px;">TABLES</div>
+                        <div class="sql-table-item" onclick="sqlApp.insertTemplate('users')"><i class="fa-solid fa-table"></i> users</div>
+                        <div class="sql-table-item" onclick="sqlApp.insertTemplate('logs')"><i class="fa-solid fa-table"></i> sys_logs</div>
+                        <div class="sql-table-item" onclick="sqlApp.insertTemplate('products')"><i class="fa-solid fa-table"></i> products</div>
+                    </div>
+                    <div class="sql-main">
+                        <div class="sql-query-area">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                                <span style="font-size:12px; color:#a1a1aa;">QUERY EDITOR</span>
+                                <button onclick="sqlApp.run()" style="background:var(--success); border:none; color:white; border-radius:4px; padding:2px 10px; cursor:pointer; font-size:11px;"><i class="fa-solid fa-play"></i> Run</button>
+                            </div>
+                            <textarea id="sql-input" class="code-area" style="padding:0;">SELECT * FROM users</textarea>
+                        </div>
+                        <div class="sql-results" id="sql-output">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-markdown" class="window hidden" style="left: 250px; top: 100px; width: 900px; height: 600px;">
+            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-markdown')">
+                <div class="traffic-lights"><div class="traffic-light tf-close" onclick="appManager.close('markdown')"></div></div>
+                <div class="win-title">MarkText</div>
+            </div>
+            <div class="window-content" style="display:flex; height:100%;">
+                <textarea id="md-input" class="md-editor" oninput="mdApp.render()"># Welcome to MarkText
+
+**Core OS** includes a built-in markdown editor.
+
+- [x] Fast
+- [ ] Bloated
+
+> "Code is poetry."
+
+## Try typing here!
+        </textarea>
+                <div id="md-output" class="md-preview"></div>
+            </div>
+        </div>
+
+        <div id="win-themes" class="window hidden" style="left: 300px; top: 150px; width: 500px; height: 400px;">
+            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-themes')">
+                <div class="traffic-lights"><div class="traffic-light tf-close" onclick="appManager.close('themes')"></div></div>
+                <div class="win-title">Appearance</div>
+            </div>
+            <div class="window-content" style="padding: 20px;">
+                <h3 style="margin-top:0; color:white;">Select Theme</h3>
+                <p style="color:var(--text-muted); font-size:13px; margin-bottom:15px;">Personalize your environment.</p>
+
+                <div class="theme-grid">
+                    <div class="theme-card" onclick="themeManager.setTheme('default')">
+                        <div class="theme-preview" style="background:linear-gradient(45deg, #6366f1, #050505);"></div>
+                        <div class="theme-name">Core Default</div>
+                    </div>
+                    <div class="theme-card" onclick="themeManager.setTheme('matrix')">
+                        <div class="theme-preview" style="background:linear-gradient(45deg, #00ff41, #000);"></div>
+                        <div class="theme-name">The Construct</div>
+                    </div>
+                    <div class="theme-card" onclick="themeManager.setTheme('synth')">
+                        <div class="theme-preview" style="background:linear-gradient(45deg, #ff00ff, #2b003b);"></div>
+                        <div class="theme-name">Neon Night</div>
+                    </div>
+                    <div class="theme-card" onclick="themeManager.setTheme('nord')">
+                        <div class="theme-preview" style="background:linear-gradient(45deg, #88c0d0, #2e3440);"></div>
+                        <div class="theme-name">Arctic Ice</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="toast-area"></div>
+
+        <div id="context-menu">
+            <div class="ctx-item" onclick="appManager.open('terminal')">Open Terminal Here</div>
+            <div class="ctx-item" onclick="appManager.open('code')">Open with Code</div>
+            <div class="ctx-sep"></div>
+            <div class="ctx-item" onclick="fileSystem.createFileUI()">New File...</div>
+            <div class="ctx-item" onclick="location.reload()">Refresh System</div>
+        </div>
+
+    </div>
+
+    <script>
+
+        const { ipcRenderer } = require("electron")
+        const pathModule = require("path");
+
+        async function checkAuth() {
+            const loggedIn = await ipcRenderer.invoke("get-auth-state")
+            if (loggedIn) unlockDesktop()
+            setupCrossDisplayListeners();
+        }
+
+        checkAuth()
+
+        window.addEventListener("DOMContentLoaded", async () => {
+            const loggedIn = await ipcRenderer.invoke("get-auth-state")
+            if (loggedIn) unlockDesktop()
+        })
+
+        // --- VIRTUAL FILE SYSTEM (VFS) ---
+        class VirtualFS {
+            constructor() {
+                // Initialize default files if not in storage
+                const saved = localStorage.getItem('core_os_vfs');
+                if (saved) {
+                    this.files = JSON.parse(saved);
+                } else {
+                    this.files = {
+                        'main.js': { content: 'console.log("Welcome to Core OS");', type: 'js' },
+                        'style.css': { content: 'body { background: #000; }', type: 'css' },
+                        'notes.txt': { content: 'Project Ideas:\n- AI Code Assistant\n- Web OS', type: 'txt' }
+                    };
+                }
+                this.currentFile = 'main.js';
+            }
+
+            save() {
+                localStorage.setItem('core_os_vfs', JSON.stringify(this.files));
+            }
+
+            writeFile(name, content) {
+                this.files[name] = { content: content, type: name.split('.').pop() };
+                this.save();
+                this.refreshUI();
+            }
+
+            readFile(name) {
+                return this.files[name] ? this.files[name].content : null;
+            }
+
+            deleteFile(name) {
+                delete this.files[name];
+                this.save();
+                this.refreshUI();
+            }
+
+            listFiles() {
+                return Object.keys(this.files);
+            }
+
+            // Editor Linkage
+            refreshUI() {
+                const list = document.getElementById('editor-file-list');
+                list.innerHTML = '';
+                Object.keys(this.files).forEach(file => {
+                    const div = document.createElement('div');
+                    div.className = `file-item ${file === this.currentFile ? 'active' : ''}`;
+                    // Icon logic
+                    let icon = 'fa-file';
+                    if (file.endsWith('js')) icon = 'fa-brands fa-js';
+                    if (file.endsWith('css')) icon = 'fa-brands fa-css3';
+                    if (file.endsWith('html')) icon = 'fa-brands fa-html5';
+
+                    div.innerHTML = `<i class="${icon}"></i> ${file}`;
+                    div.onclick = () => this.openInEditor(file);
+                    list.appendChild(div);
+                });
+            }
+
+            openInEditor(filename) {
+                this.currentFile = filename;
+                document.getElementById('code-area').value = this.files[filename].content;
+
+                // Update tabs
+                const tabs = document.getElementById('editor-tabs');
+                tabs.innerHTML = `<div class="editor-tab active">${filename} <i class="fa-solid fa-xmark" style="margin-left:10px; font-size:10px;"></i></div>`;
+
+                this.refreshUI();
+            }
+
+            saveCurrentFile() {
+                const content = document.getElementById('code-area').value;
+                this.files[this.currentFile].content = content;
+                this.save();
+            }
+
+            createFileUI() {
+                const name = prompt("Enter file name (e.g., app.js):");
+                if (name) {
+                    this.writeFile(name, "// New file");
+                    notifications.show(`File ${name} created`, 'success');
+                }
+            }
+        }
+
+        const fileSystem = new VirtualFS();
+
+        const openFileInOS = async (filePath) => {
+            const error = await ipcRenderer.invoke('fs-open', filePath);
+            if (error) {
+                notifications.show(`Unable to open file: ${error}`, 'danger');
+            }
+        };
+
+        // --- REAL FILE SYSTEM INTEGRATION ---
+        const explorerApp = {
+            currentPath: '',
+            special: {
+                root: "__ROOT__",
+                home: "",
+                downloads: "",
+                documents: "",
+                desktop: ""
+            },
+
+            init: async () => {
+                const specialPaths = await ipcRenderer.invoke('fs-special-paths');
+                explorerApp.special = { ...explorerApp.special, ...specialPaths };
+                await explorerApp.navigate(explorerApp.special.home);
+            },
+
+            navigate: async (dirPath) => {
+                // 1. Ask Main Process for files (requires the main.js update from before)
+                const result = await ipcRenderer.invoke('fs-read-dir', dirPath);
+
+                if (result.error) {
+                    notifications.show(`Error: ${result.error}`, 'danger');
+                    return;
+                }
+
+                // 2. Update State
+                explorerApp.currentPath = result.path;
+
+                // 3. Update Address Bar
+                const addrBar = document.getElementById('exp-path');
+                if (addrBar) addrBar.value = result.path;
+
+                // 4. Render Grid
+                explorerApp.render(result.files);
+            },
+
+            render: (files) => {
+                const grid = document.getElementById('file-grid');
+                grid.innerHTML = ''; // Clear existing items
+
+                files.forEach(file => {
+                    const el = document.createElement('div');
+                    el.className = 'file-icon';
+
+                    // Determine Icon & Color
+                    let iconClass = 'fa-file';
+                    let color = '#a1a1aa'; // Default gray
+
+                    if (file.isDirectory) {
+                        iconClass = 'fa-folder';
+                        color = '#fbbf24'; // Folder Yellow
+                    } else if (file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+                        iconClass = 'fa-file-image';
+                        color = '#818cf8'; // Indigo
+                    } else if (file.name.match(/\.(js|html|css|json|py)$/i)) {
+                        iconClass = 'fa-file-code';
+                        color = '#34d399'; // Green
+                    } else if (file.name.endsWith('.pdf')) {
+                        iconClass = 'fa-file-pdf';
+                        color = '#f87171'; // Red
+                    } else if (file.name.endsWith('.zip') || file.name.endsWith('.rar')) {
+                        iconClass = 'fa-file-zipper';
+                        color = '#fcd34d';
+                    }
+
+                    el.onmousedown = (e) => {
+                        if (e.button !== 0) return;
+                        dragManager.start(e, 'new-item', {
+                            name: file.name,
+                            path: file.path,
+                            type: 'file',
+                            icon: file.isDirectory ? 'fa-folder' : 'fa-file',
+                            color: file.isDirectory ? '#fbbf24' : '#a1a1aa'
+                        });
+                    };
+
+                    // HTML Structure matching your CSS
+                    el.innerHTML = `
+                    <div class="f-img"><i class="fa-solid ${iconClass}" style="color: ${color}"></i></div>
+                    <div class="f-name">${file.name}</div>
+                `;
+
+                    // Double Click to Open/Enter
+                    el.ondblclick = () => {
+                        if (file.isDirectory) {
+                            explorerApp.navigate(file.path);
+                        } else {
+                            // Open file in default OS app
+                            openFileInOS(file.path);
+                        }
+                    }
+
+                    // Single click for selection visual
+                    el.onclick = () => {
+                        document.querySelectorAll('.file-icon').forEach(i => i.classList.remove('selected'));
+                        el.classList.add('selected');
+                    };
+
+                    grid.appendChild(el);
+                });
+            },
+
+            goUp: () => {
+                // Calculate parent directory
+                const parent = pathModule.dirname(explorerApp.currentPath);
+                if (parent && parent !== explorerApp.currentPath) {
+                    explorerApp.navigate(parent);
+                }
+            },
+
+            refresh: () => {
+                explorerApp.navigate(explorerApp.currentPath);
+            },
+
+            newFolder: async () => {
+                const name = prompt("Folder Name:");
+                if (!name) return;
+                await ipcRenderer.invoke('fs-create-folder', pathModule.join(explorerApp.currentPath, name));
+                explorerApp.navigate(explorerApp.currentPath); // Refresh
+            },
+
+            newFile: async () => {
+                const name = prompt("File Name:");
+                if (!name) return;
+                await ipcRenderer.invoke('fs-create-file', pathModule.join(explorerApp.currentPath, name));
+                explorerApp.navigate(explorerApp.currentPath); // Refresh
+            },
+
+            // UPDATE your navigate/render loop to add drag listeners:
+            // Inside where you create the file elements:
+            // el.onmousedown = (e) => dragManager.start(e, 'new-item', { 
+            //      name: f.name, 
+            //      path: f.path, 
+            //      type: 'file', 
+            //      icon: f.isDirectory ? 'fa-folder' : 'fa-file', 
+            //      color: '#fff' 
+            // });
+        };
+
+        // Initialize Explorer when the page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            explorerApp.init();
+        });
+
+        // 1. Settings Persistence
+        function saveSettings() {
+            const settings = {
+                // Gather whatever settings you have
+                accent: getComputedStyle(document.documentElement).getPropertyValue('--accent'),
+                // ... add others
+            };
+            localStorage.setItem('core_settings', JSON.stringify(settings));
+        }
+
+        function loadSettings() {
+            const saved = localStorage.getItem('core_settings');
+            if (saved) {
+                const s = JSON.parse(saved);
+                if (s.accent) document.documentElement.style.setProperty('--accent', s.accent);
+            }
+        }
+        // Call loadSettings() on startup. Call saveSettings() whenever a setting changes.
+
+        // 2. VS Code Persistence
+        const codeEditor = document.getElementById('code-editor'); // Assuming textarea ID
+        if (codeEditor) {
+            codeEditor.value = localStorage.getItem('vs_code_content') || "";
+            codeEditor.addEventListener('input', () => {
+                localStorage.setItem('vs_code_content', codeEditor.value);
+            });
+        }
+
+        /* --- UPGRADED BROWSER ENGINE --- */
+        const browserApp = {
+            view: null,
+            bar: null,
+            loader: null,
+
+            init: () => {
+                // Grab elements
+                browserApp.view = document.getElementById('browser-view');
+                browserApp.bar = document.getElementById('browser-url');
+                browserApp.loader = document.getElementById('browser-loader');
+
+                // Listen for load events to update UI
+                browserApp.view.addEventListener('did-start-loading', () => {
+                    browserApp.loader.style.width = '20%';
+                    browserApp.loader.style.opacity = '1';
+                });
+
+                browserApp.view.addEventListener('did-stop-loading', () => {
+                    browserApp.loader.style.width = '100%';
+                    setTimeout(() => { browserApp.loader.style.opacity = '0'; }, 200);
+
+                    // Sync URL bar with actual URL (in case user clicked a link)
+                    browserApp.bar.value = browserApp.view.getURL();
+                });
+
+                browserApp.view.addEventListener('did-fail-load', (e) => {
+                    // Handle simple errors (optional)
+                    console.log("Failed to load:", e);
+                });
+
+                // Open links in same window (prevent popups from spawning new Electron windows)
+                browserApp.view.addEventListener('new-window', (e) => {
+                    browserApp.view.loadURL(e.url);
+                });
+            },
+
+            handleInput: (e) => {
+                if (e.key === 'Enter') {
+                    let val = browserApp.bar.value.trim();
+
+                    // Smart Search Logic
+                    if (val.includes(' ') || !val.includes('.')) {
+                        // Treat as search query
+                        val = 'https://www.google.com/search?q=' + encodeURIComponent(val);
+                    } else {
+                        // Treat as URL
+                        if (!val.startsWith('http')) val = 'https://' + val;
+                    }
+
+                    browserApp.view.loadURL(val);
+                    browserApp.bar.value = val; // Update bar immediately
+                    browserApp.view.focus();
+                }
+            },
+
+            back: () => {
+                if (browserApp.view.canGoBack()) browserApp.view.goBack();
+            },
+
+            forward: () => {
+                if (browserApp.view.canGoForward()) browserApp.view.goForward();
+            },
+
+            reload: () => {
+                browserApp.view.reload();
+            }
+        };
+
+        // Initialize the browser listeners once the DOM is ready
+        window.addEventListener('DOMContentLoaded', () => {
+            // We need a slight timeout to ensure the webview element is registered by Electron
+            setTimeout(browserApp.init, 1000);
+        });
+
+        /* --- SYSTEM CONFIG & PERSISTENCE --- */
+        const systemConfig = {
+            state: {
+                accent: '#6366f1',
+                glassOpacity: 0.6,
+                glassBlur: '20px',
+                font: "'JetBrains Mono', monospace",
+                wallpaperIndex: 0
+            },
+
+            init() {
+                // Load settings from local storage
+                const saved = localStorage.getItem('core_os_config');
+                if (saved) {
+                    this.state = JSON.parse(saved);
+                    this.apply();
+                }
+            },
+
+            save() {
+                localStorage.setItem('core_os_config', JSON.stringify(this.state));
+            },
+
+            apply() {
+                const r = document.documentElement;
+                r.style.setProperty('--accent', this.state.accent);
+                r.style.setProperty('--accent-hover', this.state.accent);
+                r.style.setProperty('--glass-opacity', this.state.glassOpacity);
+                r.style.setProperty('--glass-blur', this.state.glassBlur);
+                r.style.setProperty('--font-mono', this.state.font);
+
+                // Update slider texts if settings window is open
+                document.getElementById('val-opacity').innerText = Math.round(this.state.glassOpacity * 100) + '%';
+                document.getElementById('val-blur').innerText = this.state.glassBlur;
+            },
+
+            setAccent(color) {
+                this.state.accent = color;
+                this.save();
+                this.apply();
+            },
+
+            setGlass(type, val) {
+                if (type === 'opacity') {
+                    this.state.glassOpacity = val / 100;
+                    document.getElementById('val-opacity').innerText = val + '%';
+                }
+                if (type === 'blur') {
+                    this.state.glassBlur = val + 'px';
+                    document.getElementById('val-blur').innerText = val + 'px';
+                }
+                this.save();
+                this.apply();
+            },
+
+            setFont(fontName) {
+                this.state.font = fontName;
+                this.save();
+                this.apply();
+            },
+
+            reset() {
+                localStorage.clear();
+                location.reload();
+            }
+        };
+
+        function browserLoaded() {
+            const loader = document.getElementById('browser-loader');
+            loader.style.width = '100%';
+            setTimeout(() => { loader.style.width = '0%'; }, 500);
+        }
+
+        function reloadBrowser() {
+            const frame = document.getElementById('browser-frame');
+            document.getElementById('browser-loader').style.width = '70%';
+            frame.src = frame.src;
+        }
+
+        const desktopManager = {
+            shortcuts: [],
+
+            init: () => {
+                // Load from storage
+                const saved = localStorage.getItem('core_shortcuts');
+                if (saved) desktopManager.shortcuts = JSON.parse(saved);
+                desktopManager.render();
+
+                // Global click to hide context menu
+                window.addEventListener('click', () => document.getElementById('context-menu').style.display = 'none');
+            },
+
+            save: () => localStorage.setItem('core_shortcuts', JSON.stringify(desktopManager.shortcuts)),
+
+            addShortcut: (data, x, y) => {
+                const id = Date.now().toString();
+                desktopManager.shortcuts.push({
+                    id,
+                    name: data.name,
+                    path: data.path, // ID for apps, file path for files
+                    type: data.type, // 'app' or 'file'
+                    icon: data.icon, // fa-class string
+                    color: data.color,
+                    x: x - 40, // Center on mouse
+                    y: y - 45
+                });
+                desktopManager.save();
+                desktopManager.render();
+            },
+
+            removeShortcut: (id) => {
+                desktopManager.shortcuts = desktopManager.shortcuts.filter(s => s.id !== id);
+                desktopManager.save();
+                desktopManager.render();
+            },
+
+            render: () => {
+                const area = document.getElementById('shortcut-area');
+                area.innerHTML = '';
+                desktopManager.shortcuts.forEach(s => {
+                    const el = document.createElement('div');
+                    el.className = 'shortcut';
+                    el.style.left = `${s.x}px`;
+                    el.style.top = `${s.y}px`;
+                    el.innerHTML = `<i class="fa-solid ${s.icon} s-icon" style="color:${s.color}"></i><div class="s-name">${s.name}</div>`;
+
+                    // Drag existing shortcut
+                    el.onmousedown = (e) => dragManager.start(e, 'move-shortcut', s.id);
+
+                    // Double click to open
+                    el.ondblclick = () => {
+                        if (s.type === 'app') appManager.open(s.path); // path is app ID (e.g., 'code')
+                        else openFileInOS(s.path);
+                    };
+
+                    // Right click context menu
+                    el.oncontextmenu = (e) => {
+                        e.preventDefault();
+                        const menu = document.getElementById('context-menu');
+                        menu.style.display = 'block';
+                        menu.style.left = e.clientX + 'px';
+                        menu.style.top = e.clientY + 'px';
+                        menu.innerHTML = `<div class="ctx-item" onclick="desktopManager.removeShortcut('${s.id}')">Delete Shortcut</div>`;
+                    };
+
+                    area.appendChild(el);
+                });
+            }
+        };
+        // Call init at the bottom of your script
+
+        const dragManager = {
+            mode: null,
+            data: null,
+            ghost: document.getElementById('drag-ghost'),
+            offset: { x: 0, y: 0 },
+
+            init: () => {
+                document.addEventListener('mousemove', dragManager.move);
+                document.addEventListener('mouseup', dragManager.end);
+            },
+
+            // Call this onmousedown of files in explorer or apps in dock
+            start: (e, mode, data) => {
+                // mode: 'new-item' (from dock/explorer) or 'move-shortcut' (existing)
+                e.preventDefault();
+                dragManager.mode = mode;
+                dragManager.data = data;
+
+                if (mode === 'new-item') {
+                    dragManager.ghost.style.display = 'flex';
+                    document.getElementById('ghost-name').innerText = data.name;
+                } else if (mode === 'move-shortcut') {
+                    // Calculate offset so it doesn't snap to top-left corner
+                    const el = e.target.closest('.shortcut');
+                    const rect = el.getBoundingClientRect();
+                    dragManager.offset = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                }
+            },
+
+            move: (e) => {
+                if (!dragManager.mode) return;
+
+                if (dragManager.mode === 'new-item') {
+                    dragManager.ghost.style.left = (e.clientX + 10) + 'px';
+                    dragManager.ghost.style.top = (e.clientY + 10) + 'px';
+                } else if (dragManager.mode === 'move-shortcut') {
+                    // Update visual position of existing shortcut immediately
+                    const s = desktopManager.shortcuts.find(x => x.id === dragManager.data);
+                    if (s) {
+                        // We re-render specifically or just update DOM for performance
+                        // For simplicity, let's update DOM directly here
+                        // Note: You need to select the element again or store ref
+                        // But simplified:
+                        s.x = e.clientX - dragManager.offset.x;
+                        s.y = e.clientY - dragManager.offset.y;
+                        desktopManager.render(); // Brute force render for safety
+                    }
+                }
+            },
+
+            // Inside dragManager.end(e):
+            end: (e) => {
+                if (!dragManager.isDragging) return;
+                dragManager.isDragging = false;
+                dragManager.ghost.style.display = 'none';
+
+                const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
+                const isTrash = dropTarget && dropTarget.closest('#trash-bin');
+
+                if (dragManager.dragType === 'new-item') {
+                    // Drop on desktop to create shortcut
+                    if (!isTrash && dropTarget && (dropTarget.id === 'desktop' || dropTarget.id === 'shortcut-area')) {
+                        desktopManager.addShortcut(dragManager.data, e.clientX - 40, e.clientY - 45);
+                    }
+                }
+                else if (dragManager.dragType === 'move-item') {
+                    if (isTrash) {
+                        // DELETE shortcut
+                        desktopManager.shortcuts = desktopManager.shortcuts.filter(s => s.id !== dragManager.data.id);
+                        desktopManager.render();
+                        desktopManager.save();
+                        notifications.show("Shortcut Removed", "success");
+                    } else {
+                        // MOVE shortcut
+                        const item = desktopManager.shortcuts.find(s => s.id === dragManager.data.id);
+                        if (item) {
+                            item.x = e.clientX - dragManager.offset.x;
+                            item.y = e.clientY - dragManager.offset.y;
+                            desktopManager.render();
+                            desktopManager.save();
+                        }
+                    }
+                }
+
+                // Cleanup visual effect
+                document.getElementById('trash-bin').classList.remove('drag-over');
+            }
+        };
+        dragManager.init();
+
+        /* --- DEVTOYS LOGIC --- */
+        const devToys = {
+            switchTab(tool) {
+                // Hide all
+                document.querySelectorAll('.tool-view').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.tool-btn').forEach(el => el.classList.remove('active'));
+
+                // Show selected
+                document.getElementById(`tool-${tool}`).classList.add('active');
+                // This is a bit of a hack to highlight the button based on index,
+                // in production you'd use IDs for buttons too.
+                const btns = document.querySelectorAll('.tool-btn');
+                if (tool === 'json') btns[0].classList.add('active');
+                if (tool === 'base64') btns[1].classList.add('active');
+                if (tool === 'lorem') btns[2].classList.add('active');
+            },
+
+            formatJSON() {
+                try {
+                    const input = document.getElementById('dt-json-input').value;
+                    const obj = JSON.parse(input);
+                    document.getElementById('dt-json-output').value = JSON.stringify(obj, null, 4);
+                } catch (e) {
+                    document.getElementById('dt-json-output').value = "Invalid JSON Error";
+                }
+            },
+
+            minifyJSON() {
+                try {
+                    const input = document.getElementById('dt-json-input').value;
+                    const obj = JSON.parse(input);
+                    document.getElementById('dt-json-output').value = JSON.stringify(obj);
+                } catch (e) {
+                    document.getElementById('dt-json-output').value = "Invalid JSON Error";
+                }
+            },
+
+            b64Encode() {
+                const input = document.getElementById('dt-b64-input').value;
+                document.getElementById('dt-b64-output').value = btoa(input);
+            },
+
+            b64Decode() {
+                try {
+                    const input = document.getElementById('dt-b64-input').value;
+                    document.getElementById('dt-b64-output').value = atob(input);
+                } catch (e) {
+                    document.getElementById('dt-b64-output').value = "Invalid Base64";
+                }
+            },
+
+            genLorem(paras) {
+                const text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+                let res = "";
+                for (let i = 0; i < paras; i++) res += text + "\n\n";
+                document.getElementById('dt-lorem-output').value = res;
+            }
+        };
+
+        // Initialize Settings on Boot
+        // Add this line inside your existing window.onload function:
+        // systemConfig.init();
+
+        // --- WINDOW MANAGER ---
+        // --- REPLACE EXISTING WindowManager CLASS IN index.html ---
+
+        class WindowManager {
+            constructor() {
+                this.zIndex = 100;
+                this.dragItem = null;
+                this.offset = { x: 0, y: 0 };
+                this.isDragging = false;
+
+                document.addEventListener('mousemove', (e) => this.drag(e));
+                document.addEventListener('mouseup', () => this.stopDrag());
+            }
+
+            focus(id) {
+                const win = document.getElementById(id);
+                if (win) win.style.zIndex = ++this.zIndex;
+            }
+
+            startDrag(e, id) {
+                if (document.getElementById(id).classList.contains('maximized')) return;
+
+                this.dragItem = document.getElementById(id);
+                this.focus(id);
+                this.isDragging = true;
+
+                // Calculate offset
+                const rect = this.dragItem.getBoundingClientRect();
+                this.offset.x = e.clientX - rect.left;
+                this.offset.y = e.clientY - rect.top;
+            }
+
+            drag(e) {
+                if (!this.dragItem || !this.isDragging) return;
+
+                // Normal movement
+                let newX = e.clientX - this.offset.x;
+                let newY = e.clientY - this.offset.y;
+
+                this.dragItem.style.left = newX + 'px';
+                this.dragItem.style.top = newY + 'px';
+
+                // --- CROSS DISPLAY LOGIC ---
+                const edgeThreshold = 10; // pixels from edge
+                let direction = null;
+
+                if (e.clientX >= window.innerWidth - edgeThreshold) direction = 'right';
+                else if (e.clientX <= edgeThreshold) direction = 'left';
+
+                // If hitting edge, trigger teleport
+                if (direction) {
+                    const appId = this.dragItem.id.replace('win-', '');
+                    this.stopDrag(); // Stop dragging on this screen
+
+                    // Gather State (Add more apps here as needed)
+                    let state = {};
+                    if (appId === 'code') state.content = document.getElementById('code-area').value;
+                    if (appId === 'terminal') state.html = document.getElementById('term-body').innerHTML;
+                    if (appId === 'browser') state.url = document.getElementById('browser-url').value;
+
+                    // Send to Main
+                    ipcRenderer.send('app-cross-display', { appId, state, direction });
+                }
+            }
+
+            stopDrag() {
+                this.dragItem = null;
+                this.isDragging = false;
+            }
+        }
+
+        // --- ADD THIS HELPER FUNCTION IN index.html ---
+
+        function setupCrossDisplayListeners() {
+            // 1. Success: The app moved to another screen, so hide it here
+            ipcRenderer.on('app-teleported-success', (event, appId) => {
+                appManager.close(appId);
+            });
+
+            // 2. Incoming: We are receiving an app from another screen
+            ipcRenderer.on('incoming-app', (event, data) => {
+                const { appId, state, edge } = data;
+
+                // Open the app
+                appManager.open(appId);
+                const win = document.getElementById(`win-${appId}`);
+
+                // Restore State
+                if (appId === 'code' && state.content) document.getElementById('code-area').value = state.content;
+                if (appId === 'terminal' && state.html) document.getElementById('term-body').innerHTML = state.html;
+                if (appId === 'browser' && state.url) {
+                    document.getElementById('browser-url').value = state.url;
+                    document.getElementById('browser-frame').src = state.url;
+                }
+
+                // Position it at the correct entry point
+                const width = win.offsetWidth;
+
+                if (edge === 'right') {
+                    // Coming from the right (so we place it on left)
+                    win.style.left = '10px';
+                } else if (edge === 'left') {
+                    // Coming from the left (so we place it on right)
+                    win.style.left = (window.innerWidth - width - 10) + 'px';
+                }
+
+                // Keep same Y height roughly
+                win.style.top = '100px';
+
+                windowManager.focus(`win-${appId}`);
+            });
+        }
+
+        const windowManager = new WindowManager();
+
+        // Listen for download completion from Main Process
+        ipcRenderer.on('download-complete', (event, { fileName, filePath }) => {
+            notifications.show(`Download Complete: ${fileName}`, 'success');
+
+            // If we are currently looking at the Downloads folder, refresh to show the new file
+            if (explorerApp.currentPath.includes('Downloads')) {
+                explorerApp.refresh();
+            }
+        });
+
+        // --- APP MANAGER ---
+        const appManager = {
+            open: (app) => {
+                const win = document.getElementById(`win-${app}`);
+                if (win) {
+                    win.classList.remove('hidden');
+                    windowManager.focus(`win-${app}`);
+                    document.getElementById(`dock-${app}`).classList.add('active');
+
+                    // In index.html script
+                    const codeArea = document.querySelector('.code-area');
+
+                    // Load saved draft on startup
+                    const savedDraft = localStorage.getItem('editor-draft');
+                    if (savedDraft && codeArea) codeArea.value = savedDraft;
+
+                    // Save every time you type
+                    codeArea.addEventListener('input', () => {
+                        localStorage.setItem('editor-draft', codeArea.value);
+                    });
+
+                    // Specific app init
+                    if (app === 'code') fileSystem.refreshUI();
+                    if (app === 'code') fileSystem.openInEditor(fileSystem.currentFile);
+                    if (app === 'settings') {
+                        audioManager.init(); // Load devices only when opening settings
+                    }
+                } else {
+                    notifications.show('App not installed in this demo.', 'warning');
+                }
+            },
+            close: (app) => {
+                document.getElementById(`win-${app}`).classList.add('hidden');
+                document.getElementById(`dock-${app}`).classList.remove('active');
+            },
+            maximize: (app) => {
+                document.getElementById(`win-${app}`).classList.toggle('maximized');
+            },
+            minimize: (app) => {
+                // Animation to dock could go here
+                document.getElementById(`win-${app}`).classList.add('hidden');
+            }
+        };
+
+        // --- NOTIFICATIONS ---
+        const notifications = {
+            show: (msg, type = 'info') => {
+                const area = document.getElementById('toast-area');
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                let icon = '<i class="fa-solid fa-info-circle"></i>';
+                if (type === 'success') icon = '<i class="fa-solid fa-check-circle" style="color:var(--success)"></i>';
+                if (type === 'warning') icon = '<i class="fa-solid fa-exclamation-triangle" style="color:var(--warning)"></i>';
+
+                toast.innerHTML = `${icon} <span>${msg}</span>`;
+                area.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100%)';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        };
+
+        // --- GLOBAL CLOCK INIT ---
+        // Run this immediately on all windows (Main and Secondary)
+        setInterval(() => {
+            const clock = document.getElementById('clock');
+            if (clock) {
+                clock.innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+        }, 1000);
+
+        // --- TERMINAL LOGIC ---
+        const termInput = document.getElementById('term-input');
+        termInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const cmd = termInput.value.trim();
+                const container = document.getElementById('term-body');
+
+                // Add command to history
+                const line = document.createElement('div');
+                line.className = 'term-output';
+                line.innerHTML = `<span class="term-prompt">user@core:~$</span>${cmd}`;
+                container.insertBefore(line, termInput.parentElement);
+
+                const output = document.createElement('div');
+                output.className = 'term-output';
+
+                // Command Parser
+                const args = cmd.split(' ');
+                const command = args[0].toLowerCase();
+
+                switch (command) {
+                    case 'help':
+                        output.innerHTML = `
+            <div style="color:var(--accent); font-weight:bold; margin-bottom:5px;">CORE OS HELPER v1.0</div>
+            <div>Available Commands:</div>
+            <table style="width:100%; text-align:left; margin-top:5px;">
+                <tr><td style="color:#6be585">ls</td><td>List directory contents</td></tr>
+                <tr><td style="color:#6be585">cat [file]</td><td>Read file content</td></tr>
+                <tr><td style="color:#6be585">touch [file]</td><td>Create new empty file</td></tr>
+                <tr><td style="color:#6be585">rm [file]</td><td>Remove file</td></tr>
+                <tr><td style="color:#6be585">node [file]</td><td>Execute JavaScript file</td></tr>
+                <tr><td style="color:#6be585">date</td><td>Show system time</td></tr>
+                <tr><td style="color:#6be585">clear</td><td>Clear terminal screen</td></tr>
+            </table>
+        `;
+                        break;
+                    case 'date':
+                        output.innerText = new Date().toString();
+                        break;
+                    case 'clear':
+                        container.innerHTML = '';
+                        container.appendChild(termInput.parentElement); // Re-add input
+                        termInput.value = '';
+                        termInput.focus();
+                        return; // Exit
+                    case 'ls':
+                        output.innerText = fileSystem.listFiles().join('    ');
+                        output.style.color = '#82aaff';
+                        break;
+                    case 'whoami':
+                        output.innerText = "root";
+                        break;
+                    case 'cat':
+                        if (args[1]) {
+                            const content = fileSystem.readFile(args[1]);
+                            if (content !== null) output.innerText = content;
+                            else output.innerText = `cat: ${args[1]}: No such file`;
+                        } else output.innerText = "Usage: cat [filename]";
+                        break;
+                    case 'touch':
+                        if (args[1]) {
+                            fileSystem.writeFile(args[1], '');
+                            output.innerText = `Created ${args[1]}`;
+                            output.style.color = 'var(--success)';
+                        } else output.innerText = "Usage: touch [filename]";
+                        break;
+                    case 'rm':
+                        if (args[1]) {
+                            fileSystem.deleteFile(args[1]);
+                            output.innerText = `Deleted ${args[1]}`;
+                            output.style.color = 'var(--danger)';
+                        }
+                        break;
+                    case 'node':
+                        if (args[1]) {
+                            const code = fileSystem.readFile(args[1]);
+                            if (code) {
+                                try {
+                                    output.innerText = "> Execution Result:\n";
+                                    // VERY BASIC EVAL SIMULATION (Safe-ish)
+                                    // We override console.log for this execution
+                                    const originalLog = console.log;
+                                    let logs = [];
+                                    console.log = (...m) => logs.push(m.join(' '));
+                                    try {
+                                        eval(code);
+                                    } catch (e) { logs.push(e.message); }
+                                    console.log = originalLog;
+                                    output.innerText += logs.join('\n');
+                                } catch (e) {
+                                    output.innerText = "Error executing file.";
+                                }
+                            } else output.innerText = `node: ${args[1]}: File not found`;
+                        }
+                        break;
+                    default:
+                        if (cmd !== "") output.innerText = `bash: ${command}: command not found`;
+                }
+
+                if (output.innerText !== "") container.insertBefore(output, termInput.parentElement);
+                termInput.value = '';
+                container.scrollTop = container.scrollHeight;
+            }
+        });
+
+
+        /* --- UPGRADE 2: THEME MANAGER --- */
+        const themeManager = {
+            setTheme: (themeName) => {
+                const root = document.documentElement;
+
+                if (themeName === 'matrix') {
+                    root.style.setProperty('--accent', '#00ff41');
+                    root.style.setProperty('--bg-os', '#000000');
+                    root.style.setProperty('--bg-window', '#0d0d0d');
+                    root.style.setProperty('--font-ui', "'Courier New', monospace");
+                    document.body.style.fontFamily = "'Courier New', monospace";
+                    // Set Matrix Wallpaper (Static fallback if canvas fails)
+                    document.getElementById('desktop').style.backgroundImage = 'none';
+                    document.getElementById('desktop').style.backgroundColor = 'black';
+                } else if (themeName === 'synth') {
+                    root.style.setProperty('--accent', '#ff00ff');
+                    root.style.setProperty('--bg-os', '#12001f');
+                    root.style.setProperty('--bg-window', '#1f002e');
+                    root.style.setProperty('--font-ui', "'Inter', sans-serif");
+                    document.getElementById('desktop').style.backgroundImage = "url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070')";
+                } else if (themeName === 'nord') {
+                    root.style.setProperty('--accent', '#88c0d0');
+                    root.style.setProperty('--bg-os', '#2e3440');
+                    root.style.setProperty('--bg-window', '#3b4252');
+                    root.style.setProperty('--font-ui', "'Inter', sans-serif");
+                    document.getElementById('desktop').style.backgroundImage = "url('https://images.unsplash.com/photo-1483058712412-4245e9b90334?q=80&w=2070')";
+                } else {
+                    // Default
+                    root.style.setProperty('--accent', '#6366f1');
+                    root.style.setProperty('--bg-os', '#050505');
+                    root.style.setProperty('--bg-window', '#09090b');
+                    root.style.setProperty('--font-ui', "'Inter', sans-serif");
+                    document.getElementById('desktop').style.backgroundImage = "url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574')";
+                }
+            }
+        };
+
+
+        /* --- UPGRADE 3: MATRIX SCREENSAVER --- */
+        const screensaver = {
+            active: false,
+            timer: null,
+            canvas: document.getElementById('screensaver'),
+            ctx: document.getElementById('screensaver').getContext('2d'),
+            chars: "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*",
+            drops: [],
+
+            init: () => {
+                screensaver.resize();
+                window.addEventListener('resize', screensaver.resize);
+
+                // Listen for activity on the window AND any iframes
+                const activityEvents = ['mousemove', 'mousedown', 'keypress', 'touchmove'];
+
+                activityEvents.forEach(evt => {
+                    document.addEventListener(evt, screensaver.resetTimer);
+                });
+
+                screensaver.resetTimer();
+
+                // Check every second if the user is hovering over an iframe (iframe hack)
+                setInterval(() => {
+                    if (document.activeElement && document.activeElement.tagName === 'IFRAME') {
+                        screensaver.resetTimer();
+                    }
+                }, 1000);
+
+                // Loop
+                setInterval(screensaver.draw, 33);
+            },
+
+            resize: () => {
+                screensaver.canvas.width = window.innerWidth;
+                screensaver.canvas.height = window.innerHeight;
+                const columns = screensaver.canvas.width / 15; // Font size 15
+                screensaver.drops = Array(Math.floor(columns)).fill(1);
+            },
+
+            resetTimer: () => {
+                // If screensaver is already active, hide it
+                if (screensaver.active) {
+                    screensaver.canvas.style.display = 'none';
+                    screensaver.active = false;
+                }
+
+                clearTimeout(screensaver.timer);
+
+                // 1. If Browser is maximized, DO NOT activate screensaver (Movie mode)
+                const browserWin = document.getElementById('win-browser');
+                if (browserWin && browserWin.classList.contains('maximized') && !browserWin.classList.contains('hidden')) {
+                    return;
+                }
+
+                // 2. Set idle time (increased to 5 minutes for dev work)
+                screensaver.timer = setTimeout(screensaver.start, 300000); // 300,000ms = 5 mins
+            },
+
+            start: () => {
+                screensaver.active = true;
+                screensaver.canvas.style.display = 'block';
+            },
+
+            draw: () => {
+                if (!screensaver.active) return;
+
+                const ctx = screensaver.ctx;
+                // Translucent black to create trail effect
+                ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+                ctx.fillRect(0, 0, screensaver.canvas.width, screensaver.canvas.height);
+
+                ctx.fillStyle = "#0F0"; // Green text
+                ctx.font = "15px monospace";
+
+                for (let i = 0; i < screensaver.drops.length; i++) {
+                    const text = screensaver.chars[Math.floor(Math.random() * screensaver.chars.length)];
+                    ctx.fillText(text, i * 15, screensaver.drops[i] * 15);
+
+                    if (screensaver.drops[i] * 15 > screensaver.canvas.height && Math.random() > 0.975) {
+                        screensaver.drops[i] = 0;
+                    }
+                    screensaver.drops[i]++;
+                }
+            }
+        };
+
+        // Start screensaver logic
+        screensaver.init();
+
+        // --- BOOT PROCESS ---
+        window.onload = () => {
+            setTimeout(() => {
+                document.getElementById('boot-layer').classList.add('hidden');
+                document.getElementById('login-screen').classList.remove('hidden');
+                systemConfig.init();
+            }, 2000);
+        };
+
+        function checkLogin(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('desktop').classList.remove('hidden');
+                document.getElementById('desktop').classList.add('fade-in');
+                ipcRenderer.send("login-success")
+
+                // Clock
+                setInterval(() => {
+                    document.getElementById('clock').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                }, 1000);
+
+                notifications.show('Welcome back, Developer.', 'success');
+            }
+        }
+
+        ipcRenderer.on("unlock-session", () => {
+            unlockDesktop()
+        })
+
+        function unlockDesktop() {
+            document.getElementById("login-screen").classList.add("hidden")
+            document.getElementById("desktop").classList.remove("hidden")
+        }
+
+        /* --- NEW FEATURES LOGIC --- */
+
+        // 1. AI Logic
+        function handleAIChat(e) {
+            if (e.key === 'Enter') sendAIMessage();
+        }
+
+        function sendAIMessage() {
+            const input = document.getElementById('chat-input');
+            const history = document.getElementById('chat-history');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            // Add User Message
+            history.innerHTML += `<div class="msg user">${msg}</div>`;
+            input.value = '';
+            history.scrollTop = history.scrollHeight;
+
+            // Simulate Thinking Delay
+            const typing = document.createElement('div');
+            typing.className = 'msg ai';
+            typing.innerHTML = '<i class="fa-solid fa-ellipsis fa-fade"></i>';
+            history.appendChild(typing);
+            history.scrollTop = history.scrollHeight;
+
+            setTimeout(() => {
+                typing.remove();
+                let response = "I'm not connected to the cloud, but I think that's a great idea.";
+
+                // Simple heuristic responses
+                const lower = msg.toLowerCase();
+                if (lower.includes('hello') || lower.includes('hi')) response = "Greetings, developer. Ready to code?";
+                if (lower.includes('help')) response = "I can help you navigate Core OS. Try opening the Terminal or VS Code.";
+                if (lower.includes('linux')) response = "Linux is the kernel at the heart of open source. Core OS pays homage to it.";
+                if (lower.includes('js') || lower.includes('javascript')) response = "JavaScript is the engine of the web. You can run JS in the Terminal using the 'node' command.";
+                if (lower.includes('date')) response = "The current system time is " + new Date().toLocaleTimeString();
+
+                history.innerHTML += `<div class="msg ai">${response}</div>`;
+                history.scrollTop = history.scrollHeight;
+            }, 1000); // 1 second delay
+        }
+
+        // 2. Browser Logic
+        function navigateBrowser(e) {
+            if (e.key === 'Enter') {
+                let url = document.getElementById('browser-url').value;
+                if (!url.startsWith('http')) url = 'https://' + url;
+                document.getElementById('browser-frame').src = url;
+            }
+        }
+
+        // 3. Settings Logic
+        function changeAccent(color) {
+            document.documentElement.style.setProperty('--accent', color);
+            document.documentElement.style.setProperty('--accent-hover', color);
+            // Update login avatar background just in case
+            document.querySelector('.avatar').style.background = color;
+        }
+
+        const wallpapers = [
+            'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop', // Original
+            'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop', // Space
+            'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop', // Cyberpunk
+            'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop' // Abstract
+        ];
+        let wpIndex = 0;
+
+        function cycleWallpaper() {
+            wpIndex = (wpIndex + 1) % wallpapers.length;
+            document.getElementById('desktop').style.backgroundImage = `url('${wallpapers[wpIndex]}')`;
+        }
+
+        // --- CONTEXT MENU ---
+        function handleRightClick(e) {
+            e.preventDefault();
+            const menu = document.getElementById('context-menu');
+            menu.style.display = 'block';
+            menu.style.left = e.clientX + 'px';
+            menu.style.top = e.clientY + 'px';
+        }
+
+        function hideContextMenu() {
+            document.getElementById('context-menu').style.display = 'none';
+        }
+
+        function toggleStartMenu() {
+            document.getElementById('start-menu').classList.toggle('open');
+        }
+
+        /* --- NEW APPS LOGIC --- */
+
+        // 1. REQUEST APP LOGIC
+        const requestApp = {
+            send: async () => {
+                const method = document.getElementById('req-method').value;
+                const url = document.getElementById('req-url').value;
+                const bodyStr = document.getElementById('req-json-body').value;
+                const statusLabel = document.getElementById('req-status');
+                const output = document.getElementById('req-response');
+
+                statusLabel.innerText = "Sending...";
+                output.value = "Loading...";
+
+                try {
+                    const options = { method };
+                    if (method !== 'GET') {
+                        options.headers = { 'Content-Type': 'application/json' };
+                        options.body = bodyStr;
+                    }
+
+                    const res = await fetch(url, options);
+                    statusLabel.innerText = `${res.status} ${res.statusText}`;
+
+                    if (res.status >= 200 && res.status < 300) statusLabel.style.color = "var(--success)";
+                    else statusLabel.style.color = "var(--danger)";
+
+                    const data = await res.json();
+                    output.value = JSON.stringify(data, null, 2);
+                } catch (err) {
+                    statusLabel.innerText = "Error";
+                    statusLabel.style.color = "var(--danger)";
+                    output.value = err.message + "\n\n(Note: CORS might block some external sites in this demo environment.)";
+                }
+            }
+        };
+
+        // 2. SQL STUDIO LOGIC (MOCK ENGINE)
+        const sqlApp = {
+            // Mock Database
+            db: {
+                users: [
+                    { id: 1, name: "Alice", role: "Admin", active: true },
+                    { id: 2, name: "Bob", role: "Dev", active: true },
+                    { id: 3, name: "Charlie", role: "User", active: false },
+                    { id: 4, name: "David", role: "Dev", active: true }
+                ],
+                logs: [
+                    { id: 101, event: "Login", time: "10:00 AM" },
+                    { id: 102, event: "Error", time: "10:05 AM" },
+                    { id: 103, event: "Logout", time: "11:00 AM" }
+                ],
+                products: [
+                    { id: 1, name: "Keyboard", price: 120 },
+                    { id: 2, name: "Mouse", price: 50 },
+                    { id: 3, name: "Monitor", price: 300 }
+                ]
+            },
+
+            insertTemplate: (table) => {
+                document.getElementById('sql-input').value = `SELECT * FROM ${table}`;
+                sqlApp.run();
+            },
+
+            run: () => {
+                const query = document.getElementById('sql-input').value.trim();
+                const output = document.getElementById('sql-output');
+
+                // Very Basic Parser
+                const match = query.match(/SELECT \* FROM (\w+)/i);
+
+                if (match && match[1]) {
+                    const tableName = match[1];
+                    const data = sqlApp.db[tableName];
+
+                    if (data) {
+                        sqlApp.renderTable(data, output);
+                    } else {
+                        output.innerHTML = `<div style="padding:20px; color:#ef4444;">Error: Table '${tableName}' not found.</div>`;
+                    }
+                } else {
+                    output.innerHTML = `<div style="padding:20px; color:#ef4444;">Error: Syntax not supported in this demo. Try: SELECT * FROM [table]</div>`;
+                }
+            },
+
+            renderTable: (data, container) => {
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<div style="padding:20px;">No results.</div>';
+                    return;
+                }
+                const keys = Object.keys(data[0]);
+                let html = '<table class="sql-grid"><thead><tr>';
+                keys.forEach(k => html += `<th>${k.toUpperCase()}</th>`);
+                html += '</tr></thead><tbody>';
+
+                data.forEach(row => {
+                    html += '<tr>';
+                    keys.forEach(k => html += `<td>${row[k]}</td>`);
+                    html += '</tr>';
+                });
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            }
+        };
+
+        // 3. MARKDOWN APP LOGIC (SIMPLE PARSER)
+        const mdApp = {
+            render: () => {
+                const input = document.getElementById('md-input').value;
+                const output = document.getElementById('md-output');
+
+                // Simple Regex Replacement for Demo (No external libs)
+                let html = input
+                    .replace(/^# (.*$)/gim, '<h1>$1</h1>')            // h1
+                    .replace(/^## (.*$)/gim, '<h2>$1</h2>')           // h2
+                    .replace(/\*\*(.*)\*\*/gim, '<b>$1</b>')          // bold
+                    .replace(/\*(.*)\*/gim, '<i>$1</i>')              // italic
+                    .replace(/`(.*?)`/gim, '<code>$1</code>')         // inline code
+                    .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>') // quote
+                    .replace(/^- (.*$)/gim, '<li>$1</li>')            // list
+                    .replace(/\n/gim, '<br>');                        // line breaks
+
+                output.innerHTML = html;
+            },
+            init: () => {
+                mdApp.render(); // Render initial text
+            }
+        };
+
+        // Initialize Markdown on load
+        setTimeout(mdApp.init, 1000);
+
+        /* --- TOP BAR FIXES --- */
+        // This was missing before!
+        function toggleMenu(menuId) {
+            // 1. Close any currently open menus
+            const dropdowns = document.getElementsByClassName("dropdown-content");
+            for (let i = 0; i < dropdowns.length; i++) {
+                if (dropdowns[i].id !== menuId) {
+                    dropdowns[i].classList.remove('show');
+                }
+            }
+
+            // 2. Toggle the requested one
+            document.getElementById(menuId).classList.toggle("show");
+        }
+
+        // Close menus when clicking anywhere else on the desktop
+        window.onclick = function (event) {
+            if (!event.target.matches('.menu-item')) {
+                const dropdowns = document.getElementsByClassName("dropdown-content");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    if (dropdowns[i].classList.contains('show')) {
+                        dropdowns[i].classList.remove('show');
+                    }
+                }
+            }
+        }
+
+        /* --- AUDIO MANAGER --- */
+        const audioManager = {
+            init: async () => {
+                // Request permission to see devices (requires user interaction usually, or secure context)
+                // In Electron, this usually works automatically.
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const audioOutput = devices.filter(device => device.kind === 'audiooutput');
+
+                const select = document.getElementById('audio-output-select');
+                select.innerHTML = '';
+
+                audioOutput.forEach(device => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `Speaker ${select.length + 1}`;
+                    select.appendChild(option);
+                });
+            },
+
+            setDevice: async (deviceId) => {
+                // This sets the output for the Browser App specifically
+                // Note: setSinkId is a specialized web API feature
+                const browser = document.getElementById('browser-view');
+
+                try {
+                    // We try to set it on the main window audio (for system sounds)
+                    const audioElements = document.querySelectorAll('audio, video');
+                    for (const element of audioElements) {
+                        if (element.setSinkId) {
+                            await element.setSinkId(deviceId);
+                        }
+                    }
+
+                    // For the webview, we have to inject JS to tell IT to switch devices
+                    if (browser) {
+                        // This is advanced, but we try to force the webview to use the device
+                        // by executing setSinkId on its internal media elements
+                        browser.executeJavaScript(`
+                        navigator.mediaDevices.enumerateDevices().then(devs => {
+                            const audio = document.querySelectorAll('audio, video');
+                            audio.forEach(a => a.setSinkId('${deviceId}').catch(e => console.log(e)));
+                        });
+                     `);
+                    }
+
+                    notifications.show("Audio Output Switched", "success");
+                } catch (err) {
+                    console.error('Error setting audio device:', err);
+                    notifications.show("Could not switch device", "danger");
+                }
+            },
+
+            setVolume: (val) => {
+                // Create a 'gain' effect or just control media elements
+                const volume = val / 100;
+                const media = document.querySelectorAll('audio, video');
+                media.forEach(m => m.volume = volume);
+
+                // Also try to set webview volume
+                const browser = document.getElementById('browser-view');
+                if (browser) {
+                    browser.setAudioMuted(val == 0);
+                    // Webview doesn't have a direct setVolume, so we inject JS
+                    browser.executeJavaScript(`
+                    document.querySelectorAll('audio, video').forEach(el => el.volume = ${volume});
+                `);
+                }
+            }
+        };
+
+        // Initialize audio list when settings is opened
+        // You can add this trigger to your appManager.open('settings') function logic
+
+    </script>
+</body>
+</html>

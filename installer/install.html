@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Installing Core OS</title>
+    <style>
+        body {
+            background: #05080f;
+            color: #4df0ff;
+            font-family: Consolas, monospace;
+            padding: 40px;
+        }
+
+        .bar {
+            width: 100%;
+            height: 18px;
+            border: 1px solid #4df0ff;
+        }
+
+        .fill {
+            height: 100%;
+            width: 0%;
+            background: #4df0ff;
+        }
+
+        .log {
+            margin-top: 20px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <h3>Installing Core OS</h3>
+    <div class="bar"><div class="fill" id="fill"></div></div>
+    <div class="log" id="log"></div>
+
+    <script>
+        const fill = document.getElementById("fill");
+        const log = document.getElementById("log");
+
+        const steps = [
+            "Checking disk space",
+            "Allocating virtual volume",
+            "Deploying kernel image",
+            "Installing system services",
+            "Configuring developer sandbox",
+            "Finalizing installation"
+        ];
+
+        let p = 0, s = 0;
+
+        function run() {
+            let inc = p > 85 ? Math.random() * 1 : Math.random() * 4;
+            p += inc;
+            if (p > 100) p = 100;
+
+            fill.style.width = p + "%";
+
+            if (s < steps.length && p > (s + 1) * 14) {
+                log.innerHTML += "> " + steps[s] + "<br>";
+                s++;
+            }
+
+            if (p < 100) {
+                setTimeout(run, 500 + Math.random() * 700);
+            } else {
+                log.innerHTML += "> Installation complete. Rebooting...<br>";
+                setTimeout(() => location.href = "reboot.html", 2000);
+            }
+        }
+
+        run();
+
+        fs.writeFileSync(installFlag, JSON.stringify({ installed: true }));
+    </script>
+</body>
+</html>
