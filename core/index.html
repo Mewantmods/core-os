@@ -27,6 +27,9 @@
             --glass-blur: 20px;
             --glass-opacity: 0.6;
             --glass-saturation: 180%;
+            --settings-surface: rgba(10, 10, 14, 0.85);
+            --settings-border: rgba(255, 255, 255, 0.08);
+            --settings-glow: 0 18px 30px rgba(0, 0, 0, 0.4);
         }
 
         /* --- GLOBAL RESET --- */
@@ -120,6 +123,49 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+        }
+
+        #bios-screen {
+            position: absolute;
+            inset: 0;
+            background: rgba(4, 4, 8, 0.96);
+            color: #f4f4f5;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bios-panel {
+            width: 820px;
+            background: rgba(12, 12, 18, 0.92);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 28px 70px rgba(0,0,0,0.7);
+        }
+
+        .bios-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .bios-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .bios-item {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .spinner {
@@ -234,6 +280,97 @@
         .show {
             display: block;
         }
+
+        .status-item {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .status-menu {
+            position: absolute;
+            top: 32px;
+            right: 0;
+            width: 220px;
+            background: rgba(15, 15, 18, 0.95);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: var(--shadow-win);
+            display: none;
+            z-index: 3200;
+        }
+
+            .status-menu.show {
+                display: block;
+            }
+
+        .status-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .status-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .wifi-network {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+        }
+
+            .wifi-network:hover {
+                background: rgba(255, 255, 255, 0.08);
+            }
+
+        .wifi-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .wifi-ssid {
+            font-size: 0.85rem;
+        }
+
+        .wifi-status {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .status-footer {
+            margin-top: 10px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+            .status-footer button {
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text-main);
+                padding: 4px 8px;
+                border-radius: 6px;
+                cursor: pointer;
+            }
 
         /* --- FILE EXPLORER APP --- */
         .explorer-layout {
@@ -917,6 +1054,132 @@
             padding: 20px;
         }
 
+        .settings-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .settings-section {
+            background: var(--settings-surface);
+            border: 1px solid var(--settings-border);
+            border-radius: 16px;
+            padding: 16px 18px;
+            box-shadow: var(--settings-glow);
+        }
+
+        .settings-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .settings-section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .settings-section-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .settings-card-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .settings-card {
+            background: rgba(8, 8, 12, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .settings-card-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .settings-card-desc {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip-btn {
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+            .chip-btn.active {
+                border-color: var(--accent);
+                box-shadow: 0 0 0 1px var(--accent);
+            }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+            .toggle input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: #27272a;
+            border-radius: 999px;
+            transition: 0.2s;
+        }
+
+            .toggle-slider::before {
+                content: "";
+                position: absolute;
+                height: 18px;
+                width: 18px;
+                left: 3px;
+                top: 3px;
+                background: white;
+                border-radius: 50%;
+                transition: 0.2s;
+            }
+
+        .toggle input:checked + .toggle-slider {
+            background: var(--accent);
+        }
+
+            .toggle input:checked + .toggle-slider::before {
+                transform: translateX(20px);
+            }
+
         .slider-container {
             margin-bottom: 15px;
         }
@@ -1355,6 +1618,26 @@
         <p style="color: #52525b; font-size: 12px;">Initializing Kernel v4.2.0...</p>
     </div>
 
+    <div id="bios-screen" class="hidden">
+        <div class="bios-panel">
+            <div class="bios-header">
+                <div>
+                    <div style="font-weight:600; font-size:1.1rem;">CoreBoard BIOS</div>
+                    <div style="color:#a1a1aa; font-size:0.85rem;">Press Continue to resume boot</div>
+                </div>
+                <button class="login-input" style="width:auto; padding:6px 14px;" onclick="exitBios()">Continue</button>
+            </div>
+            <div class="bios-grid">
+                <div class="bios-item"><span>Model</span><strong>CoreBoard X1</strong></div>
+                <div class="bios-item"><span>Firmware</span><strong>CBX1-4.2.0</strong></div>
+                <div class="bios-item"><span>Secure Boot</span><strong>Enabled</strong></div>
+                <div class="bios-item"><span>Virtualization</span><strong>Active</strong></div>
+                <div class="bios-item"><span>Memory</span><strong>32 GB</strong></div>
+                <div class="bios-item"><span>Storage</span><strong>1 TB NVMe</strong></div>
+            </div>
+        </div>
+    </div>
+
     <div id="login-screen" class="hidden flex-center flex-col">
         <div class="login-card">
             <div class="avatar"><i class="fa-solid fa-user-astronaut"></i></div>
@@ -1373,7 +1656,7 @@
 
     <div id="shortcut-area"></div>
 
-    <div id="desktop" class="hidden" oncontextmenu="handleRightClick(event)" onclick="hideContextMenu()">
+    <div id="desktop" class="hidden" oncontextmenu="handleRightClick(event)" onclick="hideContextMenu(event)">
 
         <div id="top-bar">
             <div class="top-left">
@@ -1420,49 +1703,53 @@
             </div>
 
             <div class="top-right">
-                <span class="menu-item"><i class="fa-solid fa-wifi"></i></span>
-                <span class="menu-item"><i class="fa-solid fa-battery-full"></i></span>
+                <div class="status-item" id="wifi-status">
+                    <span class="menu-item" onclick="toggleWifiMenu(event)"><i class="fa-solid fa-wifi"></i></span>
+                    <div id="wifi-menu" class="status-menu">
+                        <div class="status-title">Wi-Fi</div>
+                        <div id="wifi-list" class="status-list"></div>
+                        <div class="status-footer">
+                            <button type="button" onclick="wifiManager.refresh()">Refresh</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="status-item" id="battery-status">
+                    <span class="menu-item" onclick="toggleBatteryMenu(event)"><i class="fa-solid fa-battery-full"></i></span>
+                    <div id="battery-menu" class="status-menu">
+                        <div class="status-title">Battery</div>
+                        <div class="status-row">Charge <strong>100%</strong></div>
+                    </div>
+                </div>
                 <span class="menu-item" id="clock">12:00</span>
             </div>
         </div>
 
         <div id="start-menu">
-            <input type="text" class="search-bar" placeholder="Search apps, files, or commands...">
+            <input type="text" class="search-bar" id="start-search" placeholder="Search apps, files, or commands..." oninput="renderStartMenuApps()">
             <div style="font-size: 12px; color: #71717a; margin-bottom: 10px;">PINNED APPS</div>
-            <div class="app-grid">
-                <div class="grid-item" onclick="appManager.open('terminal'); toggleStartMenu()">
-                    <div style="width:40px; height:40px; background:#111827; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#10b981;"><i class="fa-solid fa-terminal"></i></div>
-                    <span style="font-size:12px;">Terminal</span>
-                </div>
-                <div class="grid-item" onclick="appManager.open('code'); toggleStartMenu()">
-                    <div style="width:40px; height:40px; background:#1e40af; border-radius:8px; display:flex; align-items:center; justify-content:center; color:white;"><i class="fa-solid fa-code"></i></div>
-                    <span style="font-size:12px;">VS Code</span>
-                </div>
-                <div class="grid-item" onclick="appManager.open('git'); toggleStartMenu()">
-                    <div style="width:40px; height:40px; background:#c2410c; border-radius:8px; display:flex; align-items:center; justify-content:center; color:white;"><i class="fa-brands fa-git-alt"></i></div>
-                    <span style="font-size:12px;">GitLens</span>
-                </div>
-            </div>
+            <div class="app-grid" id="pinned-apps"></div>
+            <div style="font-size: 12px; color: #71717a; margin: 12px 0 10px;">ALL APPS</div>
+            <div class="app-grid" id="all-apps"></div>
         </div>
 
         <div id="dock-container">
             <div class="dock">
                 <div class="app-icon" onclick="toggleStartMenu()" style="background:#333;"><i class="fa-brands fa-windows"></i></div>
                 <div style="width:1px; background:rgba(255,255,255,0.1); margin:0 5px;"></div>
-                <div class="app-icon icon-term" onclick="appManager.open('terminal')" id="dock-terminal"><i class="fa-solid fa-terminal"></i></div>
-                <div class="app-icon icon-code" onclick="appManager.open('code')" id="dock-code"><i class="fa-solid fa-code"></i></div>
-                <div class="app-icon icon-git" onclick="appManager.open('git')" id="dock-git"><i class="fa-brands fa-git-alt"></i></div>
-                <div class="app-icon" style="background: linear-gradient(135deg, #fbbf24, #d97706); color:white;" onclick="appManager.open('explorer')" id="dock-explorer">
+                <div class="app-icon icon-term" onclick="appManager.open('terminal')" oncontextmenu="showAppContextMenu(event, 'terminal')" id="dock-terminal"><i class="fa-solid fa-terminal"></i></div>
+                <div class="app-icon icon-code" onclick="appManager.open('code')" oncontextmenu="showAppContextMenu(event, 'code')" id="dock-code"><i class="fa-solid fa-code"></i></div>
+                <div class="app-icon icon-git" onclick="appManager.open('git')" oncontextmenu="showAppContextMenu(event, 'git')" id="dock-git"><i class="fa-brands fa-git-alt"></i></div>
+                <div class="app-icon" style="background: linear-gradient(135deg, #fbbf24, #d97706); color:white;" onclick="appManager.open('explorer')" oncontextmenu="showAppContextMenu(event, 'explorer')" id="dock-explorer">
                     <i class="fa-solid fa-folder-open"></i>
                 </div>
-                <div class="app-icon" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); color:white;" onclick="appManager.open('ai')" id="dock-ai"><i class="fa-solid fa-robot"></i></div>
-                <div class="app-icon icon-browser" onclick="appManager.open('browser')" id="dock-browser"><i class="fa-brands fa-chrome"></i></div>
-                <div class="app-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706); color:white;" onclick="appManager.open('devtoys')" id="dock-devtoys"><i class="fa-solid fa-toolbox"></i></div>
-                <div class="app-icon" style="background: linear-gradient(135deg, #FF6B6B, #EE5253); color:white;" onclick="appManager.open('request')" id="dock-request"><i class="fa-solid fa-satellite-dish"></i></div>
-                <div class="app-icon" style="background: linear-gradient(135deg, #48dbfb, #0abde3); color:white;" onclick="appManager.open('sql')" id="dock-sql"><i class="fa-solid fa-database"></i></div>
-                <div class="app-icon" style="background: linear-gradient(135deg, #feca57, #ff9f43); color:white;" onclick="appManager.open('markdown')" id="dock-markdown"><i class="fa-brands fa-markdown"></i></div>
-                <div class="app-icon" style="background: linear-gradient(135deg, #a8a29e, #78716c); color:white;" onclick="appManager.open('themes')" id="dock-themes"><i class="fa-solid fa-palette"></i></div>
-                <div class="app-icon icon-settings" onclick="appManager.open('settings')" id="dock-settings"><i class="fa-solid fa-gear"></i></div>
+                <div class="app-icon" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); color:white;" onclick="appManager.open('ai')" oncontextmenu="showAppContextMenu(event, 'ai')" id="dock-ai"><i class="fa-solid fa-robot"></i></div>
+                <div class="app-icon icon-browser" onclick="appManager.open('browser')" oncontextmenu="showAppContextMenu(event, 'browser')" id="dock-browser"><i class="fa-brands fa-chrome"></i></div>
+                <div class="app-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706); color:white;" onclick="appManager.open('devtoys')" oncontextmenu="showAppContextMenu(event, 'devtoys')" id="dock-devtoys"><i class="fa-solid fa-toolbox"></i></div>
+                <div class="app-icon" style="background: linear-gradient(135deg, #FF6B6B, #EE5253); color:white;" onclick="appManager.open('request')" oncontextmenu="showAppContextMenu(event, 'request')" id="dock-request"><i class="fa-solid fa-satellite-dish"></i></div>
+                <div class="app-icon" style="background: linear-gradient(135deg, #48dbfb, #0abde3); color:white;" onclick="appManager.open('sql')" oncontextmenu="showAppContextMenu(event, 'sql')" id="dock-sql"><i class="fa-solid fa-database"></i></div>
+                <div class="app-icon" style="background: linear-gradient(135deg, #feca57, #ff9f43); color:white;" onclick="appManager.open('markdown')" oncontextmenu="showAppContextMenu(event, 'markdown')" id="dock-markdown"><i class="fa-brands fa-markdown"></i></div>
+                <div class="app-icon" style="background: linear-gradient(135deg, #a8a29e, #78716c); color:white;" onclick="appManager.open('themes')" oncontextmenu="showAppContextMenu(event, 'themes')" id="dock-themes"><i class="fa-solid fa-palette"></i></div>
+                <div class="app-icon icon-settings" onclick="appManager.open('settings')" oncontextmenu="showAppContextMenu(event, 'settings')" id="dock-settings"><i class="fa-solid fa-gear"></i></div>
                 <div id="trash-bin" class="app-icon" style="background: linear-gradient(135deg, #ef4444, #991b1b); margin-left: 20px;">
                     <i class="fa-solid fa-trash-can"></i>
                 </div>
@@ -1557,32 +1844,32 @@
                         <button onclick="explorerApp.newFolder()" style="background:transparent; border:1px solid var(--border); color:white; border-radius:4px; cursor:pointer;"><i class="fa-solid fa-folder-plus"></i></button>
                         <button onclick="explorerApp.newFile()" style="background:transparent; border:1px solid var(--border); color:white; border-radius:4px; cursor:pointer;"><i class="fa-solid fa-file-circle-plus"></i></button>
                         <input id="exp-path" type="text" style="flex:1; background:rgba(0,0,0,0.5); border:none; color:white; padding:4px 8px; border-radius:4px; font-size:12px;" readonly>
+                    </div>
+                </div>
+                <div class="explorer-body">
+                    <div class="explorer-sidebar">
+                        <div class="file-item" onclick="explorerApp.navigate('__ROOT__')">
+                            <i class="fa-solid fa-hard-drive"></i> Root (C:)
+                        </div>
+
+                        <div class="file-item" onclick="explorerApp.navigate(explorerApp.special.home)">
+                            <i class="fa-solid fa-house"></i> Home
+                        </div>
+
+                        <div class="file-item" onclick="explorerApp.navigate(explorerApp.special.documents)">
+                            <i class="fa-solid fa-folder"></i> Documents
+                        </div>
+
+                        <div class="file-item" onclick="explorerApp.navigate(explorerApp.special.downloads)">
+                            <i class="fa-solid fa-download"></i> Downloads
                         </div>
                     </div>
-                    <div class="explorer-body">
-                        <div class="explorer-sidebar">
-                            <div class="file-item" onclick="explorerApp.navigate('__ROOT__')">
-                                <i class="fa-solid fa-hard-drive"></i> Root (C:)
-                            </div>
-
-                            <div class="file-item" onclick="explorerApp.navigate(explorerApp.special.home)">
-                                <i class="fa-solid fa-house"></i> Home
-                            </div>
-
-                            <div class="file-item" onclick="explorerApp.navigate(explorerApp.special.documents)">
-                                <i class="fa-solid fa-folder"></i> Documents
-                            </div>
-
-                            <div class="file-item" onclick="explorerApp.navigate(explorerApp.special.downloads)">
-                                <i class="fa-solid fa-download"></i> Downloads
-                            </div>
-                        </div>
-                        <div class="explorer-main">
-                            <div class="file-grid" id="file-grid">
-                            </div>
+                    <div class="explorer-main">
+                        <div class="file-grid" id="file-grid">
                         </div>
                     </div>
                 </div>
+            </div>
         </div>
 
         <div id="win-ai" class="window hidden" style="left: 300px; top: 150px; width: 400px; height: 500px;">
@@ -1646,52 +1933,154 @@
                 <div class="win-title">System Settings</div>
             </div>
             <div class="window-content" style="padding:20px; overflow-y:auto;">
+                <div class="settings-shell">
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <div>
+                                <div class="settings-section-title">Personalization</div>
+                                <div class="settings-section-subtitle">Shape the look and feel of Core OS.</div>
+                            </div>
+                        </div>
+                        <div class="settings-card-grid">
+                            <div class="settings-card">
+                                <div class="settings-card-title">Accent Color</div>
+                                <div class="settings-grid" style="padding:0;">
+                                    <div class="color-swatch" style="background:#6366f1" onclick="systemConfig.setAccent('#6366f1')"></div>
+                                    <div class="color-swatch" style="background:#10b981" onclick="systemConfig.setAccent('#10b981')"></div>
+                                    <div class="color-swatch" style="background:#ef4444" onclick="systemConfig.setAccent('#ef4444')"></div>
+                                    <div class="color-swatch" style="background:#f59e0b" onclick="systemConfig.setAccent('#f59e0b')"></div>
+                                    <div class="color-swatch" style="background:#ec4899" onclick="systemConfig.setAccent('#ec4899')"></div>
+                                    <div class="color-swatch" style="background:#06b6d4" onclick="systemConfig.setAccent('#06b6d4')"></div>
+                                </div>
+                                <div class="settings-card-desc">Accent color powers highlights, toggles, and selection rings.</div>
+                            </div>
+                            <div class="settings-card">
+                                <div class="settings-card-title">Surface Style</div>
+                                <div class="chip-row">
+                                    <button class="chip-btn" id="style-glass" onclick="systemConfig.setVisualStyle('glass')">Liquid Flow</button>
+                                    <button class="chip-btn" id="style-prism" onclick="systemConfig.setVisualStyle('prism')">Prism Veil</button>
+                                </div>
+                                <div class="settings-card-desc">Liquid Flow keeps the classic vibe. Prism Veil is a Core‑original, iridescent texture.</div>
+                            </div>
+                            <div class="settings-card">
+                                <div class="settings-card-title">Liquid Flow Controls</div>
+                                <div class="slider-container">
+                                    <div class="slider-label"><span>Transparency</span><span id="val-opacity">60%</span></div>
+                                    <input type="range" min="10" max="100" value="60" oninput="systemConfig.setGlass('opacity', this.value)">
+                                </div>
+                                <div class="slider-container">
+                                    <div class="slider-label"><span>Blur Radius</span><span id="val-blur">20px</span></div>
+                                    <input type="range" min="0" max="50" value="20" oninput="systemConfig.setGlass('blur', this.value)">
+                                </div>
+                            </div>
+                            <div class="settings-card">
+                                <div class="settings-card-title">Wallpaper</div>
+                                <div class="chip-row">
+                                    <button class="chip-btn" onclick="systemConfig.setWallpaper(0)">Cyber</button>
+                                    <button class="chip-btn" onclick="systemConfig.setWallpaper(1)">Space</button>
+                                    <button class="chip-btn" onclick="systemConfig.setWallpaper(2)">Neon</button>
+                                    <button class="chip-btn" onclick="systemConfig.setWallpaper(3)">Abstract</button>
+                                </div>
+                                <div class="settings-card-desc">Choose the vibe for your home screen.</div>
+                            </div>
+                            <div class="settings-card">
+                                <div class="settings-card-title">Clock</div>
+                                <div class="toggle-row">
+                                    <span class="settings-card-desc">Show seconds</span>
+                                    <label class="toggle">
+                                        <input type="checkbox" id="toggle-seconds" onchange="systemConfig.setShowSeconds(this.checked)">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                <h4 style="border-bottom:1px solid #333; padding-bottom:10px; margin-top:0;">Personalization</h4>
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <div>
+                                <div class="settings-section-title">Security & Privacy</div>
+                                <div class="settings-section-subtitle">Built‑in protection for browsing sessions.</div>
+                            </div>
+                        </div>
+                        <div class="settings-card-grid">
+                            <div class="settings-card">
+                                <div class="settings-card-title">Ad Blocker</div>
+                                <div class="toggle-row">
+                                    <span class="settings-card-desc">Block ads on websites + auto‑skip YouTube ads.</span>
+                                    <label class="toggle">
+                                        <input type="checkbox" id="toggle-adblock" onchange="systemConfig.setAdBlocker(this.checked)">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="settings-card-desc">Runs in the Core Navigator webview, including the YouTube skip routine.</div>
+                            </div>
+                            <div class="settings-card">
+                                <div class="settings-card-title">Focus Filter</div>
+                                <div class="toggle-row">
+                                    <span class="settings-card-desc">Mute notification sounds during deep work.</span>
+                                    <label class="toggle">
+                                        <input type="checkbox" onchange="notifications.show('Focus Filter toggled', 'success')">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                <h4 style="border-bottom:1px solid #333; padding-bottom:10px; margin-top:20px;">Sound & Media</h4>
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <div>
+                                <div class="settings-section-title">Sound & Media</div>
+                                <div class="settings-section-subtitle">Audio routing and volume control.</div>
+                            </div>
+                        </div>
+                        <div class="settings-card-grid">
+                            <div class="settings-card">
+                                <div class="settings-card-title">Output Device</div>
+                                <select id="audio-output-select" class="login-input" style="text-align:left;" onchange="audioManager.setDevice(this.value)">
+                                    <option>Default Output</option>
+                                </select>
+                            </div>
+                            <div class="settings-card">
+                                <div class="settings-card-title">Master Volume</div>
+                                <div class="slider-container">
+                                    <div class="slider-label"><span>Volume</span><span id="val-vol">100%</span></div>
+                                    <input type="range" min="0" max="100" value="100" oninput="audioManager.setVolume(this.value); document.getElementById('val-vol').innerText = this.value + '%'">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                <p style="font-size:12px; color:#a1a1aa; margin-top:10px;">Output Device</p>
-                <select id="audio-output-select" class="login-input" style="text-align:left;" onchange="audioManager.setDevice(this.value)">
-                    <option>Default Output</option>
-                </select>
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <div>
+                                <div class="settings-section-title">Typography</div>
+                                <div class="settings-section-subtitle">Choose your coding typeface.</div>
+                            </div>
+                        </div>
+                        <div class="settings-card">
+                            <select class="login-input" onchange="systemConfig.setFont(this.value)" style="text-align:left;">
+                                <option value="'JetBrains Mono', monospace">JetBrains Mono (Default)</option>
+                                <option value="'Fira Code', monospace">Fira Code</option>
+                                <option value="'Courier New', monospace">Courier New (Retro)</option>
+                            </select>
+                        </div>
+                    </div>
 
-                <div class="slider-container" style="margin-top:15px;">
-                    <div class="slider-label"><span>Master Volume</span><span id="val-vol">100%</span></div>
-                    <input type="range" min="0" max="100" value="100" oninput="audioManager.setVolume(this.value); document.getElementById('val-vol').innerText = this.value + '%'">
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <div>
+                                <div class="settings-section-title">System</div>
+                                <div class="settings-section-subtitle">Reset configuration to defaults.</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button class="login-input" style="width:auto; padding:8px 15px; margin-top:10px; background:var(--danger); border:none;" onclick="systemConfig.reset()">Factory Reset</button>
+                            <button class="login-input" style="width:auto; padding:8px 15px; margin-top:10px;" onclick="systemConfig.rebootInstaller()">Reboot to Installer</button>
+                        </div>
+                    </div>
                 </div>
-
-                <p style="font-size:12px; color:#a1a1aa; margin-top:10px;">Accent Color</p>
-                <div class="settings-grid">
-                    <div class="color-swatch" style="background:#6366f1" onclick="systemConfig.setAccent('#6366f1')"></div>
-                    <div class="color-swatch" style="background:#10b981" onclick="systemConfig.setAccent('#10b981')"></div>
-                    <div class="color-swatch" style="background:#ef4444" onclick="systemConfig.setAccent('#ef4444')"></div>
-                    <div class="color-swatch" style="background:#f59e0b" onclick="systemConfig.setAccent('#f59e0b')"></div>
-                    <div class="color-swatch" style="background:#ec4899" onclick="systemConfig.setAccent('#ec4899')"></div>
-                    <div class="color-swatch" style="background:#06b6d4" onclick="systemConfig.setAccent('#06b6d4')"></div>
-                </div>
-
-                <p style="font-size:12px; color:#a1a1aa; margin-top:20px;">Liquid Glass Effect</p>
-
-                <div class="slider-container">
-                    <div class="slider-label"><span>Transparency</span><span id="val-opacity">60%</span></div>
-                    <input type="range" min="10" max="100" value="60" oninput="systemConfig.setGlass('opacity', this.value)">
-                </div>
-
-                <div class="slider-container">
-                    <div class="slider-label"><span>Blur Radius</span><span id="val-blur">20px</span></div>
-                    <input type="range" min="0" max="50" value="20" oninput="systemConfig.setGlass('blur', this.value)">
-                </div>
-
-                <h4 style="border-bottom:1px solid #333; padding-bottom:10px; margin-top:20px;">Typography</h4>
-                <select class="login-input" onchange="systemConfig.setFont(this.value)" style="text-align:left;">
-                    <option value="'JetBrains Mono', monospace">JetBrains Mono (Default)</option>
-                    <option value="'Fira Code', monospace">Fira Code</option>
-                    <option value="'Courier New', monospace">Courier New (Retro)</option>
-                </select>
-
-                <h4 style="border-bottom:1px solid #333; padding-bottom:10px; margin-top:20px;">System</h4>
-                <button class="login-input" style="width:auto; padding:8px 15px; margin-top:10px; background:var(--danger); border:none;" onclick="systemConfig.reset()">Factory Reset</button>
             </div>
         </div>
 
@@ -1875,6 +2264,11 @@
         checkAuth()
 
         window.addEventListener("DOMContentLoaded", async () => {
+            defaultContextMenuHtml = document.getElementById('context-menu').innerHTML;
+            window.pendingInstallerConfig = await ipcRenderer.invoke('installer-get-config');
+            loadDockApps();
+            renderDock();
+            renderStartMenuApps();
             const loggedIn = await ipcRenderer.invoke("get-auth-state")
             if (loggedIn) unlockDesktop()
         })
@@ -1974,6 +2368,141 @@
             }
         };
 
+        const appRegistry = {
+            terminal: { name: "Terminal", icon: "fa-terminal", color: "#10b981" },
+            code: { name: "VS Code", icon: "fa-code", color: "#3b82f6" },
+            git: { name: "GitLens", icon: "fa-git-alt", color: "#f97316" },
+            explorer: { name: "Explorer", icon: "fa-folder-open", color: "#fbbf24" },
+            ai: { name: "AI Assistant", icon: "fa-robot", color: "#8b5cf6" },
+            browser: { name: "Browser", icon: "fa-chrome", color: "#22c55e" },
+            devtoys: { name: "DevToys", icon: "fa-toolbox", color: "#f59e0b" },
+            request: { name: "Request", icon: "fa-satellite-dish", color: "#ff6b6b" },
+            sql: { name: "SQL Studio", icon: "fa-database", color: "#48dbfb" },
+            markdown: { name: "Markdown", icon: "fa-markdown", color: "#feca57" },
+            themes: { name: "Themes", icon: "fa-palette", color: "#a8a29e" },
+            settings: { name: "Settings", icon: "fa-gear", color: "#9ca3af" }
+        };
+
+        const defaultDockApps = ['terminal', 'code', 'explorer', 'ai', 'browser', 'devtoys', 'request', 'sql', 'markdown', 'themes', 'settings'];
+        let dockApps = [];
+
+        function loadDockApps() {
+            const saved = localStorage.getItem('core_dock_apps');
+            dockApps = saved ? JSON.parse(saved) : [...defaultDockApps];
+        }
+
+        function saveDockApps() {
+            localStorage.setItem('core_dock_apps', JSON.stringify(dockApps));
+        }
+
+        function renderDock() {
+            const dock = document.getElementById('dock-apps');
+            if (!dock) return;
+            dock.innerHTML = '';
+            dockApps.forEach(appId => {
+                const meta = appRegistry[appId];
+                if (!meta) return;
+                const el = document.createElement('div');
+                el.className = 'app-icon';
+                el.style.background = `linear-gradient(135deg, ${meta.color}, #111)`;
+                el.style.color = 'white';
+                el.onclick = () => appManager.open(appId);
+                el.oncontextmenu = (event) => showAppContextMenu(event, appId);
+                el.innerHTML = `<i class="fa-solid ${meta.icon}"></i>`;
+                dock.appendChild(el);
+            });
+        }
+
+        function pinAppToDock(appId) {
+            if (!dockApps.includes(appId)) {
+                dockApps.push(appId);
+                saveDockApps();
+                renderDock();
+                renderStartMenuApps();
+            }
+        }
+
+        function unpinAppFromDock(appId) {
+            dockApps = dockApps.filter(id => id !== appId);
+            saveDockApps();
+            renderDock();
+            renderStartMenuApps();
+        }
+
+        function renderStartMenuApps() {
+            const pinnedContainer = document.getElementById('pinned-apps');
+            const allContainer = document.getElementById('all-apps');
+            const query = (document.getElementById('start-search')?.value || '').toLowerCase();
+
+            if (!pinnedContainer || !allContainer) return;
+            pinnedContainer.innerHTML = '';
+            allContainer.innerHTML = '';
+
+            const renderCard = (container, appId) => {
+                const meta = appRegistry[appId];
+                if (!meta) return;
+                const item = document.createElement('div');
+                item.className = 'grid-item';
+                item.onclick = () => { appManager.open(appId); toggleStartMenu(); };
+                item.oncontextmenu = (event) => showAppContextMenu(event, appId);
+                item.innerHTML = `
+                    <div style="width:40px; height:40px; background:${meta.color}; border-radius:8px; display:flex; align-items:center; justify-content:center; color:white;">
+                        <i class="fa-solid ${meta.icon}"></i>
+                    </div>
+                    <span style="font-size:12px;">${meta.name}</span>
+                `;
+                container.appendChild(item);
+            };
+
+            dockApps.forEach(appId => {
+                const meta = appRegistry[appId];
+                if (!meta) return;
+                if (!query || meta.name.toLowerCase().includes(query)) {
+                    renderCard(pinnedContainer, appId);
+                }
+            });
+
+            Object.keys(appRegistry).forEach(appId => {
+                const meta = appRegistry[appId];
+                if (!meta) return;
+                if (!query || meta.name.toLowerCase().includes(query)) {
+                    renderCard(allContainer, appId);
+                }
+            });
+        }
+
+        let pendingShortcut = null;
+        let defaultContextMenuHtml = "";
+
+        function showAppContextMenu(event, appId) {
+            event.preventDefault();
+            event.stopPropagation();
+            const menu = document.getElementById('context-menu');
+            const meta = appRegistry[appId] || { name: appId, icon: "fa-window-maximize", color: "#e4e4e7" };
+            const isPinned = dockApps.includes(appId);
+            menu.style.display = 'block';
+            menu.style.left = `${event.clientX}px`;
+            menu.style.top = `${event.clientY}px`;
+            menu.innerHTML = `
+                <div class="ctx-item" onclick="queueShortcutPlacement('${appId}')">Make Shortcut</div>
+                <div class="ctx-item" onclick="${isPinned ? `unpinAppFromDock('${appId}')` : `pinAppToDock('${appId}')`}">${isPinned ? 'Remove from Taskbar' : 'Pin to Taskbar'}</div>
+                <div class="ctx-item" onclick="appManager.open('${appId}')">Open ${meta.name}</div>
+            `;
+        }
+
+        function queueShortcutPlacement(appId) {
+            const meta = appRegistry[appId] || { name: appId, icon: "fa-window-maximize", color: "#e4e4e7" };
+            pendingShortcut = {
+                name: meta.name,
+                path: appId,
+                type: "app",
+                icon: meta.icon,
+                color: meta.color
+            };
+            notifications.show('Click on the desktop to place the shortcut.', 'success');
+            hideContextMenu();
+        }
+
         // --- REAL FILE SYSTEM INTEGRATION ---
         const explorerApp = {
             currentPath: '',
@@ -2053,9 +2582,9 @@
 
                     // HTML Structure matching your CSS
                     el.innerHTML = `
-                    <div class="f-img"><i class="fa-solid ${iconClass}" style="color: ${color}"></i></div>
-                    <div class="f-name">${file.name}</div>
-                `;
+                        <div class="f-img"><i class="fa-solid ${iconClass}" style="color: ${color}"></i></div>
+                        <div class="f-name">${file.name}</div>
+                    `;
 
                     // Double Click to Open/Enter
                     el.ondblclick = () => {
@@ -2092,6 +2621,10 @@
             newFolder: async () => {
                 const name = prompt("Folder Name:");
                 if (!name) return;
+                if (!explorerApp.currentPath || explorerApp.currentPath === "__ROOT__") {
+                    notifications.show("Open a folder before creating items.", "warning");
+                    return;
+                }
                 await ipcRenderer.invoke('fs-create-folder', pathModule.join(explorerApp.currentPath, name));
                 explorerApp.navigate(explorerApp.currentPath); // Refresh
             },
@@ -2099,24 +2632,30 @@
             newFile: async () => {
                 const name = prompt("File Name:");
                 if (!name) return;
+                if (!explorerApp.currentPath || explorerApp.currentPath === "__ROOT__") {
+                    notifications.show("Open a folder before creating items.", "warning");
+                    return;
+                }
                 await ipcRenderer.invoke('fs-create-file', pathModule.join(explorerApp.currentPath, name));
                 explorerApp.navigate(explorerApp.currentPath); // Refresh
             },
 
             // UPDATE your navigate/render loop to add drag listeners:
             // Inside where you create the file elements:
-            // el.onmousedown = (e) => dragManager.start(e, 'new-item', { 
-            //      name: f.name, 
-            //      path: f.path, 
-            //      type: 'file', 
-            //      icon: f.isDirectory ? 'fa-folder' : 'fa-file', 
-            //      color: '#fff' 
+            // el.onmousedown = (e) => dragManager.start(e, 'new-item', {
+            //      name: f.name,
+            //      path: f.path,
+            //      type: 'file',
+            //      icon: f.isDirectory ? 'fa-folder' : 'fa-file',
+            //      color: '#fff'
             // });
         };
 
         // Initialize Explorer when the page loads
         window.addEventListener('DOMContentLoaded', () => {
             explorerApp.init();
+            wifiManager.updateIcon();
+            wifiManager.render();
         });
 
         // 1. Settings Persistence
@@ -2152,6 +2691,7 @@
             view: null,
             bar: null,
             loader: null,
+            adBlockerEnabled: false,
 
             init: () => {
                 // Grab elements
@@ -2171,6 +2711,7 @@
 
                     // Sync URL bar with actual URL (in case user clicked a link)
                     browserApp.bar.value = browserApp.view.getURL();
+                    browserApp.applyAdBlocker();
                 });
 
                 browserApp.view.addEventListener('did-fail-load', (e) => {
@@ -2213,6 +2754,57 @@
 
             reload: () => {
                 browserApp.view.reload();
+            },
+
+            setAdBlocker: (enabled) => {
+                browserApp.adBlockerEnabled = enabled;
+                if (enabled) {
+                    browserApp.applyAdBlocker(true);
+                }
+            },
+
+            applyAdBlocker: (force = false) => {
+                if (!browserApp.view || (!browserApp.adBlockerEnabled && !force)) return;
+                const adBlockScript = `
+                        (function(){
+                            const selectors = [
+                                'iframe[src*="ad"]',
+                                '[id*="ad-"]',
+                                '[class*="ad-"]',
+                                '[class*="ads"]',
+                                '[data-ad]',
+                                'ytd-display-ad-renderer',
+                                'ytd-promoted-video-renderer',
+                                'ytd-infeed-ad-layout-renderer',
+                                '.video-ads',
+                                '.ytp-ad-player-overlay'
+                            ];
+                            selectors.forEach(sel => {
+                                document.querySelectorAll(sel).forEach(el => el.remove());
+                            });
+                        })();
+                    `;
+                const youtubeScript = `
+                        (function(){
+                            if (window.__coreAdBlockInterval) return;
+                            window.__coreAdBlockInterval = setInterval(function(){
+                                try {
+                                    const video = document.querySelector('video');
+                                    if (!video) return;
+                                    const skip = document.querySelector('.ytp-ad-skip-button-modern, .ytp-ad-skip-button');
+                                    const isAd = document.body.classList.contains('ad-showing') || document.querySelector('.ad-showing');
+                                    if (isAd && video.duration) {
+                                        video.currentTime = video.duration;
+                                    }
+                                    if (skip) {
+                                        skip.click();
+                                    }
+                                } catch (e) {}
+                            }, 1500);
+                        })();
+                    `;
+                browserApp.view.executeJavaScript(adBlockScript, true);
+                browserApp.view.executeJavaScript(youtubeScript, true);
             }
         };
 
@@ -2229,7 +2821,11 @@
                 glassOpacity: 0.6,
                 glassBlur: '20px',
                 font: "'JetBrains Mono', monospace",
-                wallpaperIndex: 0
+                wallpaperIndex: 0,
+                visualStyle: 'glass',
+                showSeconds: false,
+                adBlockerEnabled: false,
+                customWallpaperUrl: null
             },
 
             init() {
@@ -2237,8 +2833,17 @@
                 const saved = localStorage.getItem('core_os_config');
                 if (saved) {
                     this.state = JSON.parse(saved);
-                    this.apply();
                 }
+                if (window.pendingInstallerConfig) {
+                    const config = window.pendingInstallerConfig;
+                    if (typeof config.wallpaper === 'number') {
+                        this.state.wallpaperIndex = config.wallpaper;
+                    }
+                    if (config.wallpaperUrl) {
+                        this.state.customWallpaperUrl = config.wallpaperUrl;
+                    }
+                }
+                this.apply();
             },
 
             save() {
@@ -2252,10 +2857,42 @@
                 r.style.setProperty('--glass-opacity', this.state.glassOpacity);
                 r.style.setProperty('--glass-blur', this.state.glassBlur);
                 r.style.setProperty('--font-mono', this.state.font);
+                r.style.setProperty('--settings-surface', this.state.visualStyle === 'prism'
+                    ? 'linear-gradient(135deg, rgba(82, 59, 177, 0.35), rgba(22, 163, 174, 0.25), rgba(14, 116, 144, 0.2))'
+                    : 'rgba(10, 10, 14, 0.85)');
+                r.style.setProperty('--settings-border', this.state.visualStyle === 'prism'
+                    ? 'rgba(125, 211, 252, 0.25)'
+                    : 'rgba(255, 255, 255, 0.08)');
+                r.style.setProperty('--settings-glow', this.state.visualStyle === 'prism'
+                    ? '0 18px 35px rgba(56, 189, 248, 0.25)'
+                    : '0 18px 30px rgba(0, 0, 0, 0.4)');
 
                 // Update slider texts if settings window is open
                 document.getElementById('val-opacity').innerText = Math.round(this.state.glassOpacity * 100) + '%';
                 document.getElementById('val-blur').innerText = this.state.glassBlur;
+                const toggleSeconds = document.getElementById('toggle-seconds');
+                if (toggleSeconds) toggleSeconds.checked = this.state.showSeconds;
+                const toggleAdblock = document.getElementById('toggle-adblock');
+                if (toggleAdblock) toggleAdblock.checked = this.state.adBlockerEnabled;
+                const glassBtn = document.getElementById('style-glass');
+                const prismBtn = document.getElementById('style-prism');
+                if (glassBtn && prismBtn) {
+                    glassBtn.classList.toggle('active', this.state.visualStyle === 'glass');
+                    prismBtn.classList.toggle('active', this.state.visualStyle === 'prism');
+                }
+                const desktop = document.getElementById('desktop');
+                if (desktop && typeof wallpapers !== 'undefined') {
+                    if (this.state.customWallpaperUrl) {
+                        if (!wallpapers.includes(this.state.customWallpaperUrl)) {
+                            wallpapers.unshift(this.state.customWallpaperUrl);
+                            this.state.wallpaperIndex = 0;
+                        }
+                    }
+                    desktop.style.backgroundImage = `url('${wallpapers[this.state.wallpaperIndex]}')`;
+                }
+                if (browserApp && browserApp.setAdBlocker) {
+                    browserApp.setAdBlocker(this.state.adBlockerEnabled);
+                }
             },
 
             setAccent(color) {
@@ -2281,6 +2918,38 @@
                 this.state.font = fontName;
                 this.save();
                 this.apply();
+            },
+
+            setVisualStyle(style) {
+                this.state.visualStyle = style;
+                this.save();
+                this.apply();
+            },
+
+            setShowSeconds(enabled) {
+                this.state.showSeconds = enabled;
+                this.save();
+                updateClock();
+            },
+
+            setWallpaper(index) {
+                this.state.wallpaperIndex = index;
+                this.save();
+                this.apply();
+            },
+
+            setAdBlocker(enabled) {
+                this.state.adBlockerEnabled = enabled;
+                this.save();
+                this.apply();
+                notifications.show(enabled ? 'Ad Blocker enabled' : 'Ad Blocker disabled', 'success');
+            },
+
+            rebootInstaller: async () => {
+                const result = await ipcRenderer.invoke('installer-reset');
+                if (result?.error) {
+                    notifications.show(result.error, 'danger');
+                }
             },
 
             reset() {
@@ -2378,6 +3047,7 @@
             data: null,
             ghost: document.getElementById('drag-ghost'),
             offset: { x: 0, y: 0 },
+            isDragging: false,
 
             init: () => {
                 document.addEventListener('mousemove', dragManager.move);
@@ -2390,6 +3060,7 @@
                 e.preventDefault();
                 dragManager.mode = mode;
                 dragManager.data = data;
+                dragManager.isDragging = true;
 
                 if (mode === 'new-item') {
                     dragManager.ghost.style.display = 'flex';
@@ -2432,22 +3103,22 @@
                 const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
                 const isTrash = dropTarget && dropTarget.closest('#trash-bin');
 
-                if (dragManager.dragType === 'new-item') {
+                if (dragManager.mode === 'new-item') {
                     // Drop on desktop to create shortcut
                     if (!isTrash && dropTarget && (dropTarget.id === 'desktop' || dropTarget.id === 'shortcut-area')) {
                         desktopManager.addShortcut(dragManager.data, e.clientX - 40, e.clientY - 45);
                     }
                 }
-                else if (dragManager.dragType === 'move-item') {
+                else if (dragManager.mode === 'move-shortcut') {
                     if (isTrash) {
                         // DELETE shortcut
-                        desktopManager.shortcuts = desktopManager.shortcuts.filter(s => s.id !== dragManager.data.id);
+                        desktopManager.shortcuts = desktopManager.shortcuts.filter(s => s.id !== dragManager.data);
                         desktopManager.render();
                         desktopManager.save();
                         notifications.show("Shortcut Removed", "success");
                     } else {
                         // MOVE shortcut
-                        const item = desktopManager.shortcuts.find(s => s.id === dragManager.data.id);
+                        const item = desktopManager.shortcuts.find(s => s.id === dragManager.data);
                         if (item) {
                             item.x = e.clientX - dragManager.offset.x;
                             item.y = e.clientY - dragManager.offset.y;
@@ -2459,6 +3130,8 @@
 
                 // Cleanup visual effect
                 document.getElementById('trash-bin').classList.remove('drag-over');
+                dragManager.mode = null;
+                dragManager.data = null;
             }
         };
         dragManager.init();
@@ -2717,12 +3390,18 @@
 
         // --- GLOBAL CLOCK INIT ---
         // Run this immediately on all windows (Main and Secondary)
-        setInterval(() => {
+        function updateClock() {
             const clock = document.getElementById('clock');
-            if (clock) {
-                clock.innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            }
-        }, 1000);
+            if (!clock) return;
+            const options = systemConfig?.state?.showSeconds
+                ? { hour: '2-digit', minute: '2-digit', second: '2-digit' }
+                : { hour: '2-digit', minute: '2-digit' };
+            clock.innerText = new Date().toLocaleTimeString([], options);
+        }
+
+        // --- GLOBAL CLOCK INIT ---
+        // Run this immediately on all windows (Main and Secondary)
+        setInterval(updateClock, 1000);
 
         // --- TERMINAL LOGIC ---
         const termInput = document.getElementById('term-input');
@@ -2747,18 +3426,18 @@
                 switch (command) {
                     case 'help':
                         output.innerHTML = `
-            <div style="color:var(--accent); font-weight:bold; margin-bottom:5px;">CORE OS HELPER v1.0</div>
-            <div>Available Commands:</div>
-            <table style="width:100%; text-align:left; margin-top:5px;">
-                <tr><td style="color:#6be585">ls</td><td>List directory contents</td></tr>
-                <tr><td style="color:#6be585">cat [file]</td><td>Read file content</td></tr>
-                <tr><td style="color:#6be585">touch [file]</td><td>Create new empty file</td></tr>
-                <tr><td style="color:#6be585">rm [file]</td><td>Remove file</td></tr>
-                <tr><td style="color:#6be585">node [file]</td><td>Execute JavaScript file</td></tr>
-                <tr><td style="color:#6be585">date</td><td>Show system time</td></tr>
-                <tr><td style="color:#6be585">clear</td><td>Clear terminal screen</td></tr>
-            </table>
-        `;
+                <div style="color:var(--accent); font-weight:bold; margin-bottom:5px;">CORE OS HELPER v1.0</div>
+                <div>Available Commands:</div>
+                <table style="width:100%; text-align:left; margin-top:5px;">
+                    <tr><td style="color:#6be585">ls</td><td>List directory contents</td></tr>
+                    <tr><td style="color:#6be585">cat [file]</td><td>Read file content</td></tr>
+                    <tr><td style="color:#6be585">touch [file]</td><td>Create new empty file</td></tr>
+                    <tr><td style="color:#6be585">rm [file]</td><td>Remove file</td></tr>
+                    <tr><td style="color:#6be585">node [file]</td><td>Execute JavaScript file</td></tr>
+                    <tr><td style="color:#6be585">date</td><td>Show system time</td></tr>
+                    <tr><td style="color:#6be585">clear</td><td>Clear terminal screen</td></tr>
+                </table>
+            `;
                         break;
                     case 'date':
                         output.innerText = new Date().toString();
@@ -2967,6 +3646,21 @@
             }, 2000);
         };
 
+        function openBios() {
+            document.getElementById('bios-screen').classList.remove('hidden');
+        }
+
+        function exitBios() {
+            document.getElementById('bios-screen').classList.add('hidden');
+        }
+
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'F6') {
+                event.preventDefault();
+                openBios();
+            }
+        });
+
         function checkLogin(e) {
             if (e.key === 'Enter') {
                 document.getElementById('login-screen').classList.add('hidden');
@@ -2974,10 +3668,7 @@
                 document.getElementById('desktop').classList.add('fade-in');
                 ipcRenderer.send("login-success")
 
-                // Clock
-                setInterval(() => {
-                    document.getElementById('clock').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                }, 1000);
+                updateClock();
 
                 notifications.show('Welcome back, Developer.', 'success');
             }
@@ -3064,17 +3755,26 @@
             document.getElementById('desktop').style.backgroundImage = `url('${wallpapers[wpIndex]}')`;
         }
 
-        // --- CONTEXT MENU ---
         function handleRightClick(e) {
             e.preventDefault();
             const menu = document.getElementById('context-menu');
+            if (defaultContextMenuHtml) {
+                menu.innerHTML = defaultContextMenuHtml;
+            }
             menu.style.display = 'block';
             menu.style.left = e.clientX + 'px';
             menu.style.top = e.clientY + 'px';
         }
 
-        function hideContextMenu() {
+        function hideContextMenu(event) {
             document.getElementById('context-menu').style.display = 'none';
+            if (!pendingShortcut || !event) return;
+            const isBackground = event.target.id === 'desktop' || event.target.id === 'shortcut-area';
+            if (isBackground) {
+                desktopManager.addShortcut(pendingShortcut, event.clientX, event.clientY);
+                notifications.show(`${pendingShortcut.name} shortcut added`, 'success');
+                pendingShortcut = null;
+            }
         }
 
         function toggleStartMenu() {
@@ -3213,6 +3913,117 @@
         // Initialize Markdown on load
         setTimeout(mdApp.init, 1000);
 
+        const wifiManager = {
+            networks: [
+                { ssid: "backofhouse", strength: "Strong", password: "Love0612" },
+                { ssid: "MommaBear..", strength: "Medium", password: "love0612" },
+                { ssid: "HiddenNetwork", strength: "Strong", password: "hidden402wowlolyoudontpass" }
+            ],
+            connectedSsid: null,
+            connectingSsid: null,
+
+            render: () => {
+                const list = document.getElementById('wifi-list');
+                if (!list) return;
+                list.innerHTML = '';
+
+                wifiManager.networks.forEach(network => {
+                    const item = document.createElement('div');
+                    item.className = 'wifi-network';
+
+                    const meta = document.createElement('div');
+                    meta.className = 'wifi-meta';
+
+                    const ssid = document.createElement('div');
+                    ssid.className = 'wifi-ssid';
+                    ssid.textContent = network.ssid;
+
+                    const status = document.createElement('div');
+                    status.className = 'wifi-status';
+                    status.textContent = wifiManager.connectingSsid === network.ssid
+                        ? 'Connecting...'
+                        : wifiManager.connectedSsid === network.ssid
+                            ? 'Connected'
+                            : `Signal: ${network.strength}`;
+
+                    meta.appendChild(ssid);
+                    meta.appendChild(status);
+
+                    const action = document.createElement('span');
+                    action.textContent = wifiManager.connectingSsid === network.ssid
+                        ? 'Connecting...'
+                        : wifiManager.connectedSsid === network.ssid
+                            ? '✔'
+                            : 'Connect';
+
+                    item.appendChild(meta);
+                    item.appendChild(action);
+
+                    item.onclick = () => wifiManager.connect(network.ssid);
+
+                    list.appendChild(item);
+                });
+            },
+
+            connect: async (ssid) => {
+                if (wifiManager.connectingSsid) return;
+                const network = wifiManager.networks.find(item => item.ssid === ssid);
+                if (!network) return;
+                const entered = prompt(`Enter password for ${ssid}`);
+                if (entered === null) return;
+                if (entered !== network.password) {
+                    notifications.show('Incorrect Wi-Fi password', 'danger');
+                    return;
+                }
+
+                wifiManager.connectingSsid = ssid;
+                wifiManager.render();
+                notifications.show(`Connecting to ${ssid}...`, 'warning');
+
+                await new Promise(resolve => setTimeout(resolve, 900));
+
+                wifiManager.connectedSsid = ssid;
+                wifiManager.connectingSsid = null;
+                notifications.show(`Connected to ${ssid}`, 'success');
+                wifiManager.updateIcon();
+                wifiManager.render();
+            },
+
+            refresh: () => {
+                notifications.show('Wi-Fi scan completed', 'success');
+                wifiManager.render();
+            },
+
+            updateIcon: () => {
+                const icon = document.getElementById('wifi-icon');
+                if (!icon) return;
+                icon.className = wifiManager.connectedSsid ? 'fa-solid fa-wifi' : 'fa-solid fa-wifi-slash';
+            }
+        };
+
+        function toggleWifiMenu(event) {
+            event.stopPropagation();
+            closeStatusMenus('wifi-menu');
+            document.getElementById('wifi-menu').classList.toggle('show');
+            wifiManager.render();
+            wifiManager.updateIcon();
+        }
+
+        function toggleBatteryMenu(event) {
+            event.stopPropagation();
+            closeStatusMenus('battery-menu');
+            document.getElementById('battery-menu').classList.toggle('show');
+        }
+
+        function closeStatusMenus(exceptId) {
+            const menus = ['wifi-menu', 'battery-menu'];
+            menus.forEach(id => {
+                if (id !== exceptId) {
+                    document.getElementById(id)?.classList.remove('show');
+                }
+            });
+        }
+
         /* --- TOP BAR FIXES --- */
         // This was missing before!
         function toggleMenu(menuId) {
@@ -3237,6 +4048,9 @@
                         dropdowns[i].classList.remove('show');
                     }
                 }
+            }
+            if (!event.target.closest('.status-item')) {
+                closeStatusMenus();
             }
         }
 
@@ -3278,11 +4092,11 @@
                         // This is advanced, but we try to force the webview to use the device
                         // by executing setSinkId on its internal media elements
                         browser.executeJavaScript(`
-                        navigator.mediaDevices.enumerateDevices().then(devs => {
-                            const audio = document.querySelectorAll('audio, video');
-                            audio.forEach(a => a.setSinkId('${deviceId}').catch(e => console.log(e)));
-                        });
-                     `);
+                            navigator.mediaDevices.enumerateDevices().then(devs => {
+                                const audio = document.querySelectorAll('audio, video');
+                                audio.forEach(a => a.setSinkId('${deviceId}').catch(e => console.log(e)));
+                            });
+                         `);
                     }
 
                     notifications.show("Audio Output Switched", "success");
@@ -3304,8 +4118,8 @@
                     browser.setAudioMuted(val == 0);
                     // Webview doesn't have a direct setVolume, so we inject JS
                     browser.executeJavaScript(`
-                    document.querySelectorAll('audio, video').forEach(el => el.volume = ${volume});
-                `);
+                        document.querySelectorAll('audio, video').forEach(el => el.volume = ${volume});
+                    `);
                 }
             }
         };
