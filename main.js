@@ -1,4 +1,4 @@
-﻿const { app, BrowserWindow, ipcMain, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, screen } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const { session } = require("electron")
@@ -116,9 +116,9 @@ app.whenReady().then(() => {
     }
 })
 
-function runInstaller() {
+function runInstaller() { 
     const win = new BrowserWindow({
-        width: 1100,
+        width: 1100, 
         height: 700,
         resizable: false,
         frame: false,
@@ -129,16 +129,31 @@ function runInstaller() {
         }
     })
 
-    win.loadFile(path.join(__dirname, 'installer', 'boot.html'))
+    const bootHTML = path.join(__dirname, 'installer', 'boot.html')
+    const logoHTML = path.join(__dirname, 'installer', 'logo.html')
+    const installHTML = path.join(__dirname, 'installer', 'install.html')
+    const setupHTML = path.join(__dirname, 'installer', 'setup.html')
+    const rebootHTML = path.join(__dirname, 'installer', 'reboot.html')
 
-    setTimeout(() => win.loadFile(path.join(__dirname, 'installer', 'logo.html')), 4000)
-    setTimeout(() => win.loadFile(path.join(__dirname, 'installer', 'license.html')), 8000)
+    win.loadFile(bootHTML)
 
-    setTimeout(() => {
-        fs.writeFileSync(installFlag, JSON.stringify({ installed: true }))
-        win.close()
-        createWindows()
-    }, 12000)
+    setTimeout(() => win.loadFile(logoHTML), 4000)
+    setTimeout(() => win.loadFile(installHTML), 8000)
+    setTimeout(() => win.loadFile(setupHTML), 12000)
+
+    ipcMain.once('installer-complete', (_, setupState) => {
+        try {
+            fs.writeFileSync(path.join(app.getPath('userData'), 'setup-config.json'), JSON.stringify(setupState || {}))
+        } catch (e) {
+            console.error("Failed to save setup config:", e)
+        }
+        win.loadFile(rebootHTML)
+        setTimeout(() => {
+            fs.writeFileSync(installFlag, JSON.stringify({ installed: true }))
+            win.close()
+            createWindows()
+        }, 3500)
+    })
 }
 
 // --- FILE SYSTEM API ---
@@ -189,24 +204,33 @@ ipcMain.handle('fs-get-info', async (event, filePath) => {
     } catch (e) { return null; }
 });
 
+ipcMain.handle('installer-get-config', () => {
+    try {
+        const configPath = path.join(app.getPath('userData'), 'setup-config.json')
+        if (!fs.existsSync(configPath)) return null
+        return JSON.parse(fs.readFileSync(configPath, 'utf8'))
+    } catch (e) {
+        return null
+    }
+});
+
+ipcMain.handle('installer-reset', () => {
+    try {
+        if (fs.existsSync(installFlag)) fs.unlinkSync(installFlag)
+        app.relaunch()
+        app.exit(0)
+        return { success: true }
+    } catch (e) {
+        return { error: e.message }
+    }
+});
+
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
 });
 
 app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
-});
-
-app.on("web-contents-created", (_, contents) => {
-    contents.on("did-finish-load", () => {
-        if (contents.getURL().endsWith("reboot.html")) {
-            setTimeout(() => {
-                win.loadFile("boot.html");
-                setTimeout(() => win.loadFile("logo.html"), 3000);
-                setTimeout(() => win.loadFile("index.html"), 6500);
-            }, 3500);
-        }
-    });
 });
 
 // --- FILE SYSTEM & DOWNLOAD HANDLERS ---
