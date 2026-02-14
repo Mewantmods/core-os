@@ -32,6 +32,151 @@
             --settings-glow: 0 18px 30px rgba(0, 0, 0, 0.4);
         }
 
+        /* --- NEW: SHUTDOWN SCREEN --- */
+        #shutdown-screen {
+            position: fixed;
+            inset: 0;
+            background: black;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease;
+        }
+
+            #shutdown-screen.active {
+                opacity: 1;
+                pointer-events: all;
+            }
+
+
+        /* --- NEW: SNAP GHOST (Aero Snap) --- */
+        #snap-ghost {
+            position: fixed;
+            background: rgba(99, 102, 241, 0.2);
+            border: 2px dashed var(--accent);
+            border-radius: 12px;
+            z-index: 5000;
+            pointer-events: none;
+            display: none;
+            transition: all 0.1s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        /* --- NEW: NOTIFICATION CENTER --- */
+        #notif-center {
+            position: absolute;
+            top: 40px;
+            bottom: 10px;
+            right: -320px; /* Hidden by default */
+            width: 300px;
+            background: rgba(18, 18, 20, 0.95);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            z-index: 8000;
+            transition: right 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        }
+
+            #notif-center.open {
+                right: 10px;
+            }
+
+        .nc-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .nc-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .nc-item {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            animation: slideInRight 0.3s ease;
+            position: relative;
+        }
+
+        .nc-time {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .nc-msg {
+            font-size: 12px;
+            color: #e4e4e7;
+            line-height: 1.4;
+        }
+
+        /* --- NEW: BROWSER TABS --- */
+        .browser-tabs {
+            display: flex;
+            background: #18181b;
+            padding: 8px 8px 0 8px;
+            gap: 5px;
+            overflow-x: auto;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .b-tab {
+            padding: 6px 12px;
+            background: #27272a;
+            border-radius: 8px 8px 0 0;
+            font-size: 11px;
+            color: #a1a1aa;
+            min-width: 120px;
+            max-width: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            border: 1px solid transparent;
+            user-select: none;
+        }
+
+            .b-tab:hover {
+                background: #3f3f46;
+            }
+
+            .b-tab.active {
+                background: #fff;
+                color: #000;
+            }
+
+        .b-tab-close {
+            margin-left: 8px;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+            .b-tab-close:hover {
+                background: rgba(0,0,0,0.1);
+                color: #ef4444;
+            }
+
         /* --- GLOBAL RESET --- */
         * {
             box-sizing: border-box;
@@ -189,7 +334,44 @@
             background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') center/cover;
             z-index: 5000;
             backdrop-filter: blur(10px);
+            transition: transform 0.35s ease, opacity 0.35s ease;
+            will-change: transform;
         }
+
+            #login-screen.swiping {
+                transition: none;
+            }
+
+            #login-screen .login-swipe-hint {
+                margin-top: 16px;
+                font-size: 0.8rem;
+                color: var(--text-muted);
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+
+            #login-screen .login-swipe-meter {
+                margin: 14px auto 0;
+                width: 140px;
+                height: 4px;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.15);
+                overflow: hidden;
+                position: relative;
+            }
+
+                #login-screen .login-swipe-meter::after {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    transform: translateX(-100%);
+                    background: linear-gradient(90deg, rgba(255, 77, 140, 0.9), rgba(0, 229, 255, 0.85));
+                    transition: transform 0.2s ease;
+                }
+
+            #login-screen.swipe-armed .login-swipe-meter::after {
+                transform: translateX(-10%);
+            }
 
         .login-card {
             background: rgba(0,0,0,0.6);
@@ -204,6 +386,7 @@
             backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation)) !important;
             background: rgba(20, 20, 25, var(--glass-opacity)) !important;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.35s ease;
         }
 
         .avatar {
@@ -490,11 +673,14 @@
         .top-left {
             display: flex;
             gap: 15px;
+            align-items: center;
         }
+
 
         .top-right {
             display: flex;
             gap: 15px;
+            align-items: center;
         }
 
         .menu-item:hover {
@@ -739,42 +925,57 @@
 
         /* --- APP SPECIFIC STYLES --- */
 
-        /* Terminal */
-        .terminal-container {
-            padding: 10px;
-            font-family: var(--font-mono);
-            font-size: 14px;
-            background: rgba(0,0,0,0.95);
-            height: 100%;
-            overflow-y: auto;
-            color: #d1d5db;
+        /* --- UPDATED TERMINAL STYLES --- */
+        #win-terminal .window-content {
+            background: rgba(12, 12, 12, 0.85); /* Darker, slightly transparent */
+            backdrop-filter: blur(20px); /* Acrylic blur */
         }
 
-        .term-output {
-            white-space: pre-wrap;
-            margin-bottom: 5px;
-            line-height: 1.4;
+        .terminal-container {
+            padding: 15px;
+            font-family: 'Cascadia Code', 'Consolas', monospace; /* Authentic font */
+            font-size: 14px;
+            color: #cccccc;
+            height: 100%;
+            overflow-y: auto;
+            cursor: text;
         }
 
         .term-input-line {
             display: flex;
             align-items: center;
+            width: 100%;
         }
 
         .term-prompt {
-            color: var(--success);
+            color: #10b981; /* Default green prompt */
             margin-right: 8px;
-            font-weight: bold;
+            font-weight: 600;
+            white-space: nowrap;
         }
 
         .term-input {
             background: transparent;
             border: none;
-            color: white;
+            color: inherit;
             flex: 1;
             outline: none;
             font-family: inherit;
             font-size: inherit;
+            caret-color: white; /* Cursor color */
+        }
+
+        /* User Profile Settings styles */
+        .profile-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
         }
 
         /* VS Code / Editor */
@@ -901,27 +1102,25 @@
 
         /* Start Menu */
         #start-menu {
+            /* Existing styles... */
             position: absolute;
             bottom: 80px;
             left: 50%;
             transform: translateX(-50%) translateY(20px);
             width: 500px;
-            height: 400px;
+            height: 450px; /* Increased height slightly for better breathing room */
             background: rgba(24, 24, 27, 0.85);
             backdrop-filter: blur(25px);
             border: 1px solid var(--border);
             border-radius: 16px;
             opacity: 0;
             pointer-events: none;
-            transition: 0.2s;
+            transition: 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); /* Smoother animation */
             display: flex;
-            flex-direction: column;
+            flex-direction: column; /* Vital for the flex layout below */
             padding: 20px;
             z-index: 2001;
-            /* The "Liquid Glass" Effect */
-            backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation)) !important;
-            background: rgba(20, 20, 25, var(--glass-opacity)) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden; /* Prevents rounded corners from being cut by scrollbar */
         }
 
             #start-menu.open {
@@ -931,6 +1130,8 @@
             }
 
         .search-bar {
+            flex-shrink: 0;
+            /* existing styles... */
             background: #27272a;
             border: 1px solid #3f3f46;
             border-radius: 8px;
@@ -938,8 +1139,25 @@
             color: white;
             width: 100%;
             outline: none;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
+
+        /* NEW: The scrollable wrapper */
+        .start-menu-content {
+            flex: 1; /* Takes up remaining space */
+            overflow-y: auto; /* Enables vertical scrolling */
+            padding-right: 5px; /* Spacing for scrollbar */
+        }
+
+            /* Custom Scrollbar for Start Menu */
+            .start-menu-content::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            .start-menu-content::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 4px;
+            }
 
         .app-grid {
             display: grid;
@@ -1474,6 +1692,7 @@
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 15px;
             padding: 10px;
+            overflow-y: auto;
         }
 
         .theme-card {
@@ -1607,15 +1826,835 @@
                 box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
             }
 
+        .menu-item {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            height: 28px;
+            white-space: nowrap;
+        }
+
+        .menu-icon {
+            width: 18px;
+            height: 18px;
+            background: url('https://i.imgur.com/U1wZxl8.png') center/contain no-repeat;
+            flex: 0 0 18px;
+        }
+
+        /* --- APP: FLASHEY (All on Admin) --- */
+        #win-flashey {
+            background: #09090b;
+        }
+
+        /* Flashey Avatar */
+        .flashey-avatar-container {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .flashey-cloud {
+            font-size: 80px;
+            color: #cbd5e1; /* Cloud Gray */
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
+            animation: floaty 3s ease-in-out infinite;
+            z-index: 2;
+        }
+
+        .flashey-bolt {
+            position: absolute;
+            font-size: 40px;
+            color: #fbbf24; /* Lightning Yellow */
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            animation: flash 2s infinite;
+        }
+
+        .flashey-eyes {
+            position: absolute;
+            top: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 4;
+        }
+
+        .eye {
+            width: 8px;
+            height: 8px;
+            background: #1e293b;
+            border-radius: 50%;
+        }
+
+        /* Modes Colors */
+        .mode-hivise .flashey-cloud {
+            color: #3f3f46;
+            filter: drop-shadow(0 0 10px #ef4444);
+        }
+
+        .mode-hivise .flashey-bolt {
+            color: #ef4444;
+        }
+
+        .mode-hivise .eye {
+            background: #ef4444;
+            box-shadow: 0 0 5px #ef4444;
+        }
+
+        .mode-helping .flashey-cloud {
+            color: #e0f2fe;
+            filter: drop-shadow(0 0 15px #38bdf8);
+        }
+
+        .mode-helping .flashey-bolt {
+            color: #38bdf8;
+        }
+
+        .mode-helping .eye {
+            background: #0ea5e9;
+        }
+
+        @keyframes floaty {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes flash {
+            0%, 100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            90% {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+        }
+
+        /* Onboarding */
+        .flashey-onboarding {
+            position: absolute;
+            inset: 0;
+            background: #09090b;
+            z-index: 10;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            align-items: center;
+        }
+
+        .flashey-btn {
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            padding: 10px 20px;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+            .flashey-btn:hover {
+                background: var(--accent);
+                border-color: var(--accent);
+            }
+
+            .flashey-btn.danger:hover {
+                background: #ef4444;
+                border-color: #ef4444;
+            }
+
+        /* Code Helper Popup */
+        #flashey-helper-popup {
+            position: fixed;
+            background: #18181b;
+            border: 1px solid var(--accent);
+            padding: 5px;
+            border-radius: 6px;
+            z-index: 9999;
+            display: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--accent);
+        }
+
+        /* Troll Elements */
+        .pigeon-overlay {
+            position: fixed;
+            width: 150px;
+            pointer-events: none;
+            z-index: 9998;
+            animation: pigeonFly 5s linear forwards;
+        }
+
+        @keyframes pigeonFly {
+            from {
+                transform: translateX(-200px) translateY(0) rotate(10deg);
+            }
+
+            to {
+                transform: translateX(110vw) translateY(-100px) rotate(-10deg);
+            }
+        }
+
+        /* --- FLASHEY ADDON STORE --- */
+        .flashey-store-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            padding: 10px;
+        }
+
+        .addon-card {
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .addon-card:hover {
+                border-color: var(--accent);
+                transform: translateY(-2px);
+            }
+
+        .addon-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--text-muted);
+        }
+
+        .addon-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--text-main);
+            margin-bottom: 5px;
+        }
+
+        .addon-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.3;
+            margin-bottom: 10px;
+            height: 30px;
+            overflow: hidden;
+        }
+
+        .install-btn {
+            width: 100%;
+            padding: 6px;
+            font-size: 11px;
+            background: #27272a;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+            .install-btn:hover {
+                background: var(--accent);
+            }
+
+            .install-btn.installed {
+                background: #10b981;
+                pointer-events: none;
+            }
+
+        /* Download Bar Animation */
+        .dl-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.2s;
+        }
+
+        /* --- FLASHEY WIDGET (Out of Window) --- */
+        #flashey-widget {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            z-index: 500; /* Above desktop icons, below active windows */
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+            transition: transform 0.1s;
+        }
+
+            #flashey-widget:active {
+                cursor: grabbing;
+                transform: scale(0.95);
+            }
+
+        /* Widget Content styling */
+        .widget-cloud {
+            font-size: 60px;
+            color: #cbd5e1;
+            position: absolute;
+        }
+
+        .widget-eyes {
+            position: absolute;
+            top: 35px;
+            width: 30px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 2;
+        }
+
+        .widget-eye {
+            width: 6px;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 50%;
+        }
+
+        /* --- SKINS & MODES --- */
+        /* Cute Mode Addon */
+        .skin-cute .flashey-cloud, .skin-cute .widget-cloud {
+            color: #fbcfe8 !important;
+            filter: drop-shadow(0 0 15px #f472b6) !important;
+        }
+
+        .skin-cute .flashey-bolt {
+            color: #f472b6 !important;
+        }
+
+        .skin-cute .eye, .skin-cute .widget-eye {
+            background: #be185d !important;
+        }
+
+        .skin-cute .flashey-eyes::after { /* Blush */
+            content: '';
+            position: absolute;
+            top: 8px;
+            width: 100%;
+            height: 5px;
+            background: rgba(255,100,100,0.3);
+            border-radius: 50%;
+            blur: 2px;
+        }
+
+        /* Focus Mode Overlay */
+        #focus-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 90; /* Below active window (100) but above others */
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        /* --- APP: NEXUS (Finder/Search) --- */
+        #win-nexus {
+            background: transparent !important; /* Transparent window container */
+            box-shadow: none !important;
+            border: none !important;
+            backdrop-filter: none !important;
+        }
+
+        .nexus-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 50px;
+        }
+
+        .nexus-bar {
+            width: 600px;
+            background: rgba(20, 20, 25, 0.8);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+            animation: nexusFloat 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+            .nexus-bar:hover {
+                transform: scale(1.02);
+                border-color: var(--accent);
+            }
+
+        .nexus-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            color: white;
+            outline: none;
+            font-weight: 300;
+        }
+
+        .nexus-results {
+            width: 600px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .nexus-item {
+            background: rgba(30, 30, 35, 0.9);
+            backdrop-filter: blur(20px);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            animation: slideUp 0.3s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+            .nexus-item:nth-child(1) {
+                animation-delay: 0.05s;
+            }
+
+            .nexus-item:nth-child(2) {
+                animation-delay: 0.1s;
+            }
+
+            .nexus-item:nth-child(3) {
+                animation-delay: 0.15s;
+            }
+
+            .nexus-item:nth-child(4) {
+                animation-delay: 0.2s;
+            }
+
+            .nexus-item:hover {
+                background: var(--accent);
+                color: white;
+            }
+
+        @keyframes nexusFloat {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* --- APP: PRISM GALLERY (Photos) --- */
+        .prism-layout {
+            display: flex;
+            height: 100%;
+        }
+
+        .prism-sidebar {
+            width: 200px;
+            background: rgba(0,0,0,0.2);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .prism-nav-btn {
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #a1a1aa;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.2s;
+        }
+
+            .prism-nav-btn:hover, .prism-nav-btn.active {
+                background: rgba(255,255,255,0.1);
+                color: white;
+            }
+
+            .prism-nav-btn.active {
+                background: var(--accent);
+            }
+
+        .prism-main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Gallery Grid */
+        .prism-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .prism-img-card {
+            aspect-ratio: 1;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+            .prism-img-card:hover {
+                transform: scale(1.05);
+                border-color: var(--accent);
+                z-index: 2;
+            }
+
+            .prism-img-card img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        /* Camera Mode */
+        .prism-camera-view {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+
+        .camera-frame {
+            width: 90%;
+            max-width: 640px;
+            aspect-ratio: 16/9;
+            background: #111;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+        }
+
+        video#camera-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Mirror effect */
+        }
+
+        .shutter-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid rgba(255,255,255,0.3);
+            margin-top: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+            .shutter-btn:active {
+                transform: scale(0.9);
+                background: var(--accent);
+            }
+
+        /* --- APP: SENTINEL (Security Center) --- */
+        :root {
+            --sentinel-bg: #0f172a;
+            --sentinel-sidebar: #1e293b;
+            --sentinel-accent: #38bdf8; /* Sky Blue */
+            --sentinel-danger: #f43f5e;
+            --sentinel-success: #10b981;
+        }
+
+        #win-sentinel {
+            background: var(--sentinel-bg);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.1);
+        }
+
+        .sentinel-layout {
+            display: flex;
+            height: 100%;
+            color: #e2e8f0;
+        }
+
+        .sentinel-sidebar {
+            width: 200px;
+            background: var(--sentinel-sidebar);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .sentinel-nav-item {
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+            color: #94a3b8;
+        }
+
+            .sentinel-nav-item:hover {
+                background: rgba(255,255,255,0.05);
+                color: white;
+            }
+
+            .sentinel-nav-item.active {
+                background: linear-gradient(90deg, rgba(56, 189, 248, 0.2), transparent);
+                color: var(--sentinel-accent);
+                border-left: 3px solid var(--sentinel-accent);
+            }
+
+        .sentinel-main {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Dashboard View */
+        .sentinel-status-ring {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid var(--sentinel-sidebar);
+            border-top-color: var(--sentinel-accent);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: var(--sentinel-accent);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+            animation: sentinelPulse 3s infinite;
+            position: relative;
+        }
+
+            .sentinel-status-ring::after {
+                content: '';
+                position: absolute;
+                inset: -10px;
+                border-radius: 50%;
+                border: 1px dashed rgba(56, 189, 248, 0.3);
+                animation: spin 10s linear infinite;
+            }
+
+        @keyframes sentinelPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 20px rgba(56, 189, 248, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);
+            }
+        }
+
+        .sentinel-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .sentinel-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Scanner View */
+        .scan-progress-container {
+            height: 6px;
+            background: #1e293b;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .scan-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--sentinel-accent);
+            box-shadow: 0 0 10px var(--sentinel-accent);
+            transition: width 0.2s linear;
+        }
+
+        .scan-file-text {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: #64748b;
+            height: 20px;
+            overflow: hidden;
+        }
+
+        .threat-item {
+            background: rgba(244, 63, 94, 0.1);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            animation: slideInRight 0.3s ease;
+        }
+
+        /* VPN View */
+        .vpn-map {
+            height: 200px;
+            background: #0f172a;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .vpn-dot {
+            width: 8px;
+            height: 8px;
+            background: #64748b;
+            border-radius: 50%;
+            position: absolute;
+            transition: 0.3s;
+        }
+
+            .vpn-dot.active {
+                background: var(--sentinel-success);
+                box-shadow: 0 0 10px var(--sentinel-success);
+                transform: scale(1.5);
+            }
+
+        .vpn-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, var(--sentinel-success), transparent);
+            transform-origin: left;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .sentinel-big-btn {
+            background: var(--sentinel-accent);
+            color: #000;
+            font-weight: bold;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+
+            .sentinel-big-btn:hover {
+                filter: brightness(1.1);
+                box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+            }
+
+            .sentinel-big-btn.connected {
+                background: var(--sentinel-success);
+                color: white;
+            }
+
     </style>
 </head>
 <body>
     <canvas id="screensaver"></canvas>
 
+    <audio id="snd-boot" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio> <div id="shutdown-screen">
+        <div class="spinner" style="border-top-color: #ef4444;"></div>
+        <h3 style="margin-top:20px; font-weight: 300;">SHUTTING DOWN</h3>
+    </div>
+
+    <div id="snap-ghost"></div>
+
+    <div id="flashey-widget" onmousedown="windowManager.startDrag(event, 'flashey-widget')">
+        <i class="fa-solid fa-cloud widget-cloud"></i>
+        <div class="widget-eyes">
+            <div class="widget-eye"></div>
+            <div class="widget-eye"></div>
+        </div>
+        <div style="position:absolute; top:-30px; background:#27272a; padding:5px 10px; border-radius:20px; font-size:10px; color:white; display:none;" id="widget-speech">
+            Hi!
+        </div>
+    </div>
+
+    <div id="focus-overlay"></div>
+
+    <div id="notif-center">
+        <div class="nc-header">
+            <span>Notifications</span>
+            <button onclick="notificationCenter.clear()" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:11px;">Clear All</button>
+        </div>
+        <div class="nc-body" id="nc-list">
+            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-top:20px;">No new notifications</div>
+        </div>
+    </div>
+
     <div id="boot-layer">
         <div class="spinner"></div>
         <h3 style="margin-top: 20px; font-weight: 300; letter-spacing: 2px;">CORE<span style="font-weight:700">OS</span></h3>
-        <p style="color: #52525b; font-size: 12px;">Initializing Kernel v4.2.0...</p>
+        <p style="color: #52525b; font-size: 12px;">
+            Initializing Kernel v4.2.0...
+            F6 for BIOS
+        </p>
     </div>
 
     <div id="bios-screen" class="hidden">
@@ -1644,6 +2683,10 @@
             <h2 style="margin: 0;">Senior Dev</h2>
             <p style="color: #a1a1aa; font-size: 0.9rem;">Core OS Security</p>
             <input type="password" id="password-input" class="login-input" placeholder="Enter Password (any)" onkeypress="checkLogin(event)">
+            <div id="login-swipe-ui" class="hidden">
+                <div class="login-swipe-hint">Swipe up to unlock</div>
+                <div class="login-swipe-meter"></div>
+            </div>
         </div>
     </div>
 
@@ -1660,8 +2703,8 @@
 
         <div id="top-bar">
             <div class="top-left">
-                <span class="menu-item"><i class="fa-solid fa-bell"></i></span>
-                <span class="menu-item" style="font-weight: 700;">Core OS</span>
+                <span class="menu-item menu-icon"></span>
+                <span class="menu-item" style="font-weight:700;">Core OS</span>
 
                 <div class="dropdown">
                     <span class="menu-item" onclick="toggleMenu('menu-file')">File</span>
@@ -1713,6 +2756,9 @@
                         </div>
                     </div>
                 </div>
+                <span class="menu-item" onclick="notificationCenter.toggle()">
+                    <i class="fa-regular fa-bell"></i>
+                </span>
                 <div class="status-item" id="battery-status">
                     <span class="menu-item" onclick="toggleBatteryMenu(event)"><i class="fa-solid fa-battery-full"></i></span>
                     <div id="battery-menu" class="status-menu">
@@ -1726,15 +2772,24 @@
 
         <div id="start-menu">
             <input type="text" class="search-bar" id="start-search" placeholder="Search apps, files, or commands..." oninput="renderStartMenuApps()">
-            <div style="font-size: 12px; color: #71717a; margin-bottom: 10px;">PINNED APPS</div>
-            <div class="app-grid" id="pinned-apps"></div>
-            <div style="font-size: 12px; color: #71717a; margin: 12px 0 10px;">ALL APPS</div>
-            <div class="app-grid" id="all-apps"></div>
+
+            <div class="start-menu-content">
+                <div style="font-size: 12px; color: #71717a; margin-bottom: 10px; margin-top: 5px;">PINNED APPS</div>
+                <div class="app-grid" id="pinned-apps"></div>
+
+                <div style="font-size: 12px; color: #71717a; margin: 20px 0 10px;">ALL APPS</div>
+                <div class="app-grid" id="all-apps"></div>
+            </div>
         </div>
 
         <div id="dock-container">
             <div class="dock">
-                <div class="app-icon" onclick="toggleStartMenu()" style="background:#333;"><i class="fa-brands fa-windows"></i></div>
+                <div class="app-icon"
+                     onclick="toggleStartMenu()"
+                     style="
+                        background: #111 url('https://i.imgur.com/U1wZxl8.png') center/contain no-repeat;
+                      ">
+                </div>
                 <div style="width:1px; background:rgba(255,255,255,0.1); margin:0 5px;"></div>
                 <div class="app-icon icon-term" onclick="appManager.open('terminal')" oncontextmenu="showAppContextMenu(event, 'terminal')" id="dock-terminal"><i class="fa-solid fa-terminal"></i></div>
                 <div class="app-icon icon-code" onclick="appManager.open('code')" oncontextmenu="showAppContextMenu(event, 'code')" id="dock-code"><i class="fa-solid fa-code"></i></div>
@@ -1742,12 +2797,25 @@
                 <div class="app-icon" style="background: linear-gradient(135deg, #fbbf24, #d97706); color:white;" onclick="appManager.open('explorer')" oncontextmenu="showAppContextMenu(event, 'explorer')" id="dock-explorer">
                     <i class="fa-solid fa-folder-open"></i>
                 </div>
-                <div class="app-icon" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); color:white;" onclick="appManager.open('ai')" oncontextmenu="showAppContextMenu(event, 'ai')" id="dock-ai"><i class="fa-solid fa-robot"></i></div>
+                <div class="app-icon" style="background: linear-gradient(135deg, #fbbf24, #d97706); color:white;" onclick="appManager.open('flashey')" oncontextmenu="showAppContextMenu(event, 'flashey')" id="dock-flashey"><i class="fa-solid fa-bolt"></i></div>
                 <div class="app-icon icon-browser" onclick="appManager.open('browser')" oncontextmenu="showAppContextMenu(event, 'browser')" id="dock-browser"><i class="fa-brands fa-chrome"></i></div>
                 <div class="app-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706); color:white;" onclick="appManager.open('devtoys')" oncontextmenu="showAppContextMenu(event, 'devtoys')" id="dock-devtoys"><i class="fa-solid fa-toolbox"></i></div>
                 <div class="app-icon" style="background: linear-gradient(135deg, #FF6B6B, #EE5253); color:white;" onclick="appManager.open('request')" oncontextmenu="showAppContextMenu(event, 'request')" id="dock-request"><i class="fa-solid fa-satellite-dish"></i></div>
                 <div class="app-icon" style="background: linear-gradient(135deg, #48dbfb, #0abde3); color:white;" onclick="appManager.open('sql')" oncontextmenu="showAppContextMenu(event, 'sql')" id="dock-sql"><i class="fa-solid fa-database"></i></div>
-                <div class="app-icon" style="background: linear-gradient(135deg, #feca57, #ff9f43); color:white;" onclick="appManager.open('markdown')" oncontextmenu="showAppContextMenu(event, 'markdown')" id="dock-markdown"><i class="fa-brands fa-markdown"></i></div>
+                <div class="app-icon"
+                     style="background: linear-gradient(135deg, #ec4899, #be185d); color:white;"
+                     onclick="appManager.open('nexus')"
+                     oncontextmenu="showAppContextMenu(event, 'nexus')"
+                     id="dock-nexus">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div class="app-icon"
+                     style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color:white;"
+                     onclick="appManager.open('photos')"
+                     oncontextmenu="showAppContextMenu(event, 'photos')"
+                     id="dock-photos">
+                    <i class="fa-solid fa-images"></i>
+                </div>
                 <div class="app-icon" style="background: linear-gradient(135deg, #a8a29e, #78716c); color:white;" onclick="appManager.open('themes')" oncontextmenu="showAppContextMenu(event, 'themes')" id="dock-themes"><i class="fa-solid fa-palette"></i></div>
                 <div class="app-icon icon-settings" onclick="appManager.open('settings')" oncontextmenu="showAppContextMenu(event, 'settings')" id="dock-settings"><i class="fa-solid fa-gear"></i></div>
                 <div id="trash-bin" class="app-icon" style="background: linear-gradient(135deg, #ef4444, #991b1b); margin-left: 20px;">
@@ -1780,12 +2848,9 @@
         <div id="win-code" class="window hidden" style="left: 150px; top: 100px; width: 800px; height: 500px;">
             <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-code')">
                 <div class="traffic-lights">
-                    <div class="traffic-light tf-close" onclick="appManager.close('code')"></div>
-                    <div class="traffic-light tf-min"></div>
-                    <div class="traffic-light tf-max"></div>
-
-                    <div class="traffic-light tf-min" onclick="appManager.minimize('code')"></div>
                     <div class="traffic-light tf-max" onclick="appManager.maximize('code')"></div>
+                    <div class="traffic-light tf-min" onclick="appManager.minimize('code')"></div>
+                    <div class="traffic-light tf-close" onclick="appManager.close('code')"></div>
                 </div>
                 <div class="win-title">DevStudio</div>
             </div>
@@ -1829,6 +2894,65 @@
             </div>
         </div>
 
+        <div id="win-nexus" class="window hidden" style="left: 50%; top: 100px; transform: translateX(-50%); width: 700px; height: 500px;">
+            <div class="window-content nexus-container">
+                <div class="nexus-bar">
+                    <i class="fa-solid fa-magnifying-glass" style="font-size: 24px; color: var(--accent);"></i>
+                    <input type="text" id="nexus-input" class="nexus-input" placeholder="Search Apps, Files, or Web..." oninput="nexusApp.search(this.value)" onkeydown="nexusApp.handleKey(event)" autofocus>
+                </div>
+
+                <div id="nexus-results" class="nexus-results">
+                </div>
+
+                <div style="margin-top: auto; padding: 10px; color: #52525b; font-size: 12px;">
+                    Press ESC to close • Enter to open
+                </div>
+            </div>
+        </div>
+
+        <div id="win-photos" class="window hidden" style="left: 150px; top: 80px; width: 900px; height: 600px;">
+            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-photos')">
+                <div class="traffic-lights">
+                    <div class="traffic-light tf-close" onclick="appManager.close('photos')"></div>
+                    <div class="traffic-light tf-max" onclick="appManager.maximize('photos')"></div>
+                </div>
+                <div class="win-title">Prism Gallery</div>
+            </div>
+            <div class="window-content prism-layout">
+                <div class="prism-sidebar">
+                    <div class="prism-nav-btn active" id="btn-library" onclick="prismApp.switchTab('library')">
+                        <i class="fa-regular fa-images"></i> Library
+                    </div>
+                    <div class="prism-nav-btn" id="btn-camera" onclick="prismApp.switchTab('camera')">
+                        <i class="fa-solid fa-camera"></i> Camera
+                    </div>
+                    <div style="margin-top: auto; font-size: 11px; color: #52525b; padding: 10px;">
+                        <i class="fa-solid fa-hard-drive"></i> Connected to System Pictures
+                    </div>
+                </div>
+
+                <div class="prism-main">
+                    <div id="prism-view-library">
+                        <h2 style="margin-top:0; font-weight:300;">My <span style="font-weight:700; color:var(--accent)">Photos</span></h2>
+                        <div id="prism-grid" class="prism-grid">
+                            <div style="grid-column: 1/-1; text-align:center; padding:50px; color:#52525b;">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Loading system images...
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="prism-view-camera" class="hidden prism-camera-view">
+                        <div class="camera-frame">
+                            <video id="camera-feed" autoplay playsinline></video>
+                            <canvas id="camera-canvas" class="hidden"></canvas>
+                        </div>
+                        <button class="shutter-btn" onclick="prismApp.takePhoto()"></button>
+                        <div style="margin-top:10px; color:#71717a; font-size:12px;">Saved to Pictures/CoreOS_Captures</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="win-explorer" class="window hidden" style="left: 100px; top: 100px; width: 700px; height: 500px;">
             <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-explorer')">
                 <div class="traffic-lights">
@@ -1849,7 +2973,7 @@
                 <div class="explorer-body">
                     <div class="explorer-sidebar">
                         <div class="file-item" onclick="explorerApp.navigate('__ROOT__')">
-                            <i class="fa-solid fa-hard-drive"></i> Root (C:)
+                            <i class="fa-solid fa-hard-drive"></i> System Disk
                         </div>
 
                         <div class="file-item" onclick="explorerApp.navigate(explorerApp.special.home)">
@@ -1872,23 +2996,121 @@
             </div>
         </div>
 
-        <div id="win-ai" class="window hidden" style="left: 300px; top: 150px; width: 400px; height: 500px;">
-            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-ai')">
+        <div id="win-flashey" class="window hidden" style="left: 300px; top: 150px; width: 380px; height: 550px;">
+            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-flashey')">
                 <div class="traffic-lights">
-                    <div class="traffic-light tf-close" onclick="appManager.close('ai')"></div>
-                    <div class="traffic-light tf-min" onclick="appManager.minimize('ai')"></div>
+                    <div class="traffic-light tf-close" onclick="appManager.close('flashey')"></div>
+                    <div class="traffic-light tf-min" onclick="appManager.minimize('flashey')"></div>
                 </div>
-                <div class="win-title">Core AI Assistant</div>
+                <div class="win-title">All on Admin</div>
+                <div style="width:50px; text-align:right;"><i class="fa-solid fa-gear" style="cursor:pointer; color:#71717a;" onclick="flasheyApp.toggleSettings()"></i></div>
             </div>
-            <div class="window-content">
-                <div class="chat-container">
-                    <div class="chat-messages" id="chat-history">
-                        <div class="msg ai">Hello! I am Core AI. How can I help you with your code today?</div>
+
+            <div class="window-content" style="position:relative; overflow:hidden;">
+
+                <div id="flashey-onboarding" class="flashey-onboarding">
+                    <div style="font-size: 60px; color: var(--accent); margin-bottom: 20px;"><i class="fa-solid fa-bolt"></i></div>
+                    <h2 style="margin:0;">Welcome to All on Admin</h2>
+                    <p style="color:#a1a1aa; font-size:13px; line-height:1.5; margin: 20px 0;">
+                        I am <strong id="intro-name">Flashey</strong>. I run in the background to enhance your OS experience.
+                    </p>
+
+                    <div style="text-align:left; background:#18181b; padding:15px; border-radius:8px; border:1px solid #333; margin-bottom:20px;">
+                        <div style="margin-bottom:10px; font-size:13px;">
+                            <strong style="color:#38bdf8;">Helping Core Mode:</strong><br>
+                            <span style="color:#71717a; font-size:12px;">Auto-code completion, syntax fixes, system optimization.</span>
+                        </div>
+                        <div style="font-size:13px;">
+                            <strong style="color:#ef4444;">Hivise Mode:</strong><br>
+                            <span style="color:#71717a; font-size:12px;">Chaotic behavior, random windows, visual trolling. Use at own risk.</span>
+                        </div>
                     </div>
-                    <div class="chat-input-area">
-                        <input type="text" id="chat-input" class="login-input" style="margin:0; text-align:left;" placeholder="Ask about Linux, JS, or Life..." onkeypress="handleAIChat(event)">
-                        <button onclick="sendAIMessage()" style="background:var(--accent); border:none; color:white; padding:0 15px; border-radius:8px; cursor:pointer;"><i class="fa-solid fa-paper-plane"></i></button>
+
+                    <div style="margin-top:auto; width:100%;">
+                        <div style="font-size:10px; color:#52525b; margin-bottom:10px;">By clicking Accept, you agree to let this app modify system behavior.</div>
+                        <button class="flashey-btn" onclick="flasheyApp.completeOnboarding()">Accept Terms & Start</button>
                     </div>
+                </div>
+
+                <div id="flashey-dashboard" style="padding:20px; display:flex; flex-direction:column; height:100%; display:none;">
+
+                    <div id="flashey-avatar" class="flashey-avatar-container">
+                        <i class="fa-solid fa-cloud flashey-cloud"></i>
+                        <div class="flashey-eyes">
+                            <div class="eye"></div><div class="eye"></div>
+                        </div>
+                        <i class="fa-solid fa-bolt flashey-bolt"></i>
+                    </div>
+
+                    <h3 id="flashey-display-name" style="text-align:center; margin:0;">Flashey</h3>
+                    <p id="flashey-status" style="text-align:center; color:#a1a1aa; font-size:12px; margin-top:5px;">Waiting for command...</p>
+
+                    <div style="margin-top:30px; display:flex; flex-direction:column; gap:15px;">
+                        <div class="settings-card" onclick="flasheyApp.setMode('helping')" style="cursor:pointer; border-color: transparent;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="color:#38bdf8; font-weight:bold;"><i class="fa-solid fa-wand-magic-sparkles"></i> Helping Core</span>
+                                <div id="ind-helping" style="width:10px; height:10px; border-radius:50%; background:#333;"></div>
+                            </div>
+                        </div>
+
+                        <div class="settings-card" onclick="flasheyApp.setMode('hivise')" style="cursor:pointer; border-color: transparent;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="color:#ef4444; font-weight:bold;"><i class="fa-solid fa-mask"></i> Hivise Mode</span>
+                                <div id="ind-hivise" style="width:10px; height:10px; border-radius:50%; background:#333;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="flashey-settings" style="position:absolute; inset:0; background:#09090b; z-index:5; padding:20px; transform:translateX(100%); transition:0.3s; display:flex; flex-direction:column;">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+                        <i class="fa-solid fa-arrow-left" style="cursor:pointer;" onclick="flasheyApp.toggleSettings()"></i>
+                        <h3 style="margin:0;">Config</h3>
+                    </div>
+
+                    <div class="settings-card" style="margin-bottom:15px;">
+                        <div class="settings-card-title">Assistant Name</div>
+                        <input type="text" id="flashey-rename" class="login-input" placeholder="Flashey" oninput="flasheyApp.rename(this.value)">
+                    </div>
+
+                    <div class="settings-card" onclick="flasheyStore.open()" style="cursor:pointer; margin-bottom:15px;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div style="background:#27272a; width:30px; height:30px; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#6366f1;">
+                                <i class="fa-solid fa-puzzle-piece"></i>
+                            </div>
+                            <div>
+                                <div class="settings-card-title">Download Addons</div>
+                                <div class="settings-card-desc">Get skins, modes & plugins</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right" style="margin-left:auto; color:#52525b;"></i>
+                        </div>
+                    </div>
+
+                    <div class="settings-card" id="hivise-config-card" style="display:none;">
+                        <div class="settings-card-title">Hivise Intensity</div>
+                        <input type="range" min="1" max="10" value="5" onchange="flasheyApp.config.intensity = this.value">
+                    </div>
+
+                    <button class="flashey-btn danger" style="margin-top:auto;" onclick="flasheyApp.reset()">Factory Reset App</button>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="flashey-helper-popup">Suggestion...</div>
+
+        <div id="win-flashey-store" class="window hidden" style="left: 350px; top: 200px; width: 500px; height: 400px;">
+            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-flashey-store')">
+                <div class="traffic-lights">
+                    <div class="traffic-light tf-close" onclick="appManager.close('flashey-store')"></div>
+                </div>
+                <div class="win-title">Flashey Addons</div>
+            </div>
+            <div class="window-content" style="display:flex; flex-direction:column; background:#09090b;">
+                <div style="padding:15px; border-bottom:1px solid #27272a;">
+                    <input type="text" class="login-input" placeholder="Search addons..." onkeyup="flasheyStore.filter(this.value)">
+                </div>
+                <div id="flashey-store-list" class="flashey-store-grid" style="overflow-y:auto; flex:1;">
                 </div>
             </div>
         </div>
@@ -2025,6 +3247,28 @@
                                     </label>
                                 </div>
                             </div>
+                            <div class="settings-card">
+                                <div class="settings-card-title">Lock Screen</div>
+                                <div class="toggle-row" style="margin-bottom:10px;">
+                                    <span class="settings-card-desc">Require password on unlock.</span>
+                                    <label class="toggle">
+                                        <input type="checkbox" id="toggle-password-required" onchange="systemConfig.setPasswordEnabled(this.checked)">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="settings-grid" style="grid-template-columns: 1fr auto; align-items:center; gap:10px; margin-bottom:10px;">
+                                    <input type="password" id="password-setting" class="login-input" placeholder="Set a new password">
+                                    <button class="login-input" style="width:auto; padding:8px 14px;" onclick="systemConfig.updatePassword()">Save</button>
+                                </div>
+                                <div class="toggle-row">
+                                    <span class="settings-card-desc">Swipe up to unlock.</span>
+                                    <label class="toggle">
+                                        <input type="checkbox" id="toggle-swipe-unlock" onchange="systemConfig.setSwipeToUnlock(this.checked)">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="settings-card-desc" id="password-status">Password can be disabled for free access.</div>
+                            </div>
                         </div>
                     </div>
 
@@ -2055,6 +3299,35 @@
                     <div class="settings-section">
                         <div class="settings-section-header">
                             <div>
+                                <div class="settings-section-title">User Profile</div>
+                                <div class="settings-section-subtitle">Manage your identity.</div>
+                            </div>
+                        </div>
+                        <div class="profile-preview">
+                            <div class="avatar" style="width:60px; height:60px; font-size:1.5rem; margin:0;">
+                                <i class="fa-solid fa-user-astronaut"></i>
+                            </div>
+                            <div style="text-align:center;">
+                                <div id="preview-username" style="font-weight:bold; font-size:1.1rem;">Senior Dev</div>
+                                <div id="preview-title" style="color:var(--text-muted); font-size:0.9rem;">Core OS Security</div>
+                            </div>
+                        </div>
+                        <div class="settings-card-grid">
+                            <div class="settings-card">
+                                <div class="settings-card-title">Username</div>
+                                <input type="text" id="set-username" class="login-input" placeholder="Senior Dev" style="text-align:left; margin-top:5px;" oninput="systemConfig.updateProfilePreview()">
+                            </div>
+                            <div class="settings-card">
+                                <div class="settings-card-title">Job Title</div>
+                                <input type="text" id="set-title" class="login-input" placeholder="Core OS Security" style="text-align:left; margin-top:5px;" oninput="systemConfig.updateProfilePreview()">
+                            </div>
+                        </div>
+                        <button class="login-input" style="width:auto; margin-top:10px; background:var(--accent); border:none;" onclick="systemConfig.saveProfile()">Save Profile</button>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <div>
                                 <div class="settings-section-title">Typography</div>
                                 <div class="settings-section-subtitle">Choose your coding typeface.</div>
                             </div>
@@ -2080,6 +3353,156 @@
                             <button class="login-input" style="width:auto; padding:8px 15px; margin-top:10px;" onclick="systemConfig.rebootInstaller()">Reboot to Installer</button>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-sentinel" class="window hidden" style="left: 150px; top: 100px; width: 800px; height: 550px;">
+            <div class="title-bar" onmousedown="windowManager.startDrag(event, 'win-sentinel')">
+                <div class="traffic-lights">
+                    <div class="traffic-light tf-close" onclick="appManager.close('sentinel')"></div>
+                    <div class="traffic-light tf-min" onclick="appManager.minimize('sentinel')"></div>
+                </div>
+                <div class="win-title">Sentinel</div>
+            </div>
+            <div class="window-content sentinel-layout">
+                <div class="sentinel-sidebar">
+                    <div style="font-size:11px; font-weight:bold; color:#64748b; margin:10px 0 10px 15px;">PROTECTION</div>
+                    <div class="sentinel-nav-item active" onclick="sentinelApp.switchTab('dash', this)">
+                        <i class="fa-solid fa-shield-halved"></i> Dashboard
+                    </div>
+                    <div class="sentinel-nav-item" onclick="sentinelApp.switchTab('scan', this)">
+                        <i class="fa-solid fa-crosshairs"></i> Virus Scan
+                    </div>
+                    <div style="font-size:11px; font-weight:bold; color:#64748b; margin:20px 0 10px 15px;">NETWORK</div>
+                    <div class="sentinel-nav-item" onclick="sentinelApp.switchTab('vpn', this)">
+                        <i class="fa-solid fa-earth-americas"></i> VPN
+                    </div>
+                    <div class="sentinel-nav-item" onclick="sentinelApp.switchTab('net', this)">
+                        <i class="fa-solid fa-wifi"></i> WiFi Audit
+                    </div>
+                </div>
+
+                <div class="sentinel-main">
+
+                    <div id="sen-view-dash">
+                        <div class="sentinel-status-ring" id="sen-status-icon">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <div style="text-align:center;">
+                            <h2 style="margin:0;">System Secure</h2>
+                            <p style="color:#94a3b8; font-size:13px;">Real-time protection is active.</p>
+                        </div>
+
+                        <div class="sentinel-stat-grid">
+                            <div class="sentinel-card">
+                                <div style="font-size:12px; color:#94a3b8;">THREATS BLOCKED</div>
+                                <div style="font-size:24px; font-weight:bold;">0</div>
+                            </div>
+                            <div class="sentinel-card">
+                                <div style="font-size:12px; color:#94a3b8;">LAST SCAN</div>
+                                <div style="font-size:16px;">Just now</div>
+                            </div>
+                            <div class="sentinel-card">
+                                <div style="font-size:12px; color:#94a3b8;">FIREWALL</div>
+                                <div style="color:var(--sentinel-success);"><i class="fa-solid fa-lock"></i> Active</div>
+                            </div>
+                        </div>
+
+                        <h3 style="margin-top:30px;">Quick Actions</h3>
+                        <div class="toggle-row" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:8px; margin-bottom:10px;">
+                            <div>
+                                <div style="font-weight:600;">Browser Shield</div>
+                                <div style="font-size:12px; color:#94a3b8;">Blocks ads and trackers in Core Navigator.</div>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked onchange="systemConfig.setAdBlocker(this.checked)">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="sen-view-scan" class="hidden">
+                        <h2>System Scan</h2>
+                        <div style="background:#1e293b; padding:20px; border-radius:12px; text-align:center;">
+                            <div id="scan-animation" style="font-size:40px; color:var(--sentinel-accent); margin-bottom:10px;">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </div>
+                            <div id="scan-status">Ready to scan</div>
+
+                            <div class="scan-progress-container">
+                                <div class="scan-bar" id="scan-bar"></div>
+                            </div>
+                            <div class="scan-file-text" id="scan-file">Waiting...</div>
+
+                            <button class="sentinel-big-btn" id="btn-start-scan" style="margin-top:20px;" onclick="sentinelApp.startScan()">Quick Scan</button>
+                        </div>
+
+                        <h3 style="margin-top:20px;">Threat History</h3>
+                        <div id="threat-list">
+                            <div style="color:#64748b; font-size:13px; font-style:italic;">No threats detected recently.</div>
+                        </div>
+                    </div>
+
+                    <div id="sen-view-vpn" class="hidden">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h2 style="margin:0;">Sentinel VPN</h2>
+                            <div style="background:#1e293b; padding:5px 10px; border-radius:6px; font-size:12px; color:var(--sentinel-success);">
+                                <i class="fa-solid fa-shield-cat"></i> Encrypted
+                            </div>
+                        </div>
+
+                        <div class="vpn-map" id="vpn-map-container">
+                            <div style="position:absolute; inset:0; opacity:0.1; background:url('https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg') center/cover no-repeat;"></div>
+                        </div>
+
+                        <div style="display:flex; gap:20px;">
+                            <div style="flex:1;">
+                                <label style="font-size:12px; color:#94a3b8;">LOCATION</label>
+                                <select id="vpn-loc-select" class="login-input" style="text-align:left; margin-top:5px;">
+                                    <option value="us">🇺🇸 New York, USA</option>
+                                    <option value="uk">🇬🇧 London, UK</option>
+                                    <option value="jp">🇯🇵 Tokyo, Japan</option>
+                                    <option value="de">🇩🇪 Berlin, Germany</option>
+                                </select>
+                            </div>
+                            <div style="flex:1;">
+                                <label style="font-size:12px; color:#94a3b8;">STATUS</label>
+                                <div id="vpn-status-text" style="margin-top:10px; font-weight:bold; color:#94a3b8;">Disconnected</div>
+                            </div>
+                        </div>
+
+                        <button class="sentinel-big-btn" id="btn-vpn-toggle" style="margin-top:20px;" onclick="sentinelApp.toggleVPN()">Connect</button>
+                    </div>
+
+                    <div id="sen-view-net" class="hidden">
+                        <h2>Wi-Fi Audit</h2>
+                        <div class="sentinel-card" style="align-items:center; padding:40px;">
+                            <div style="font-size:4rem; color:var(--sentinel-accent); margin-bottom:10px;" id="net-icon">
+                                <i class="fa-solid fa-wifi"></i>
+                            </div>
+                            <div id="net-status-msg" style="font-size:1.2rem; font-weight:bold;">Audit Ready</div>
+                            <div id="net-details" style="color:#94a3b8; font-size:13px;">Click test to analyze current connection.</div>
+
+                            <button class="login-input" style="width:auto; margin-top:20px; background:var(--sentinel-accent); border:none;" onclick="sentinelApp.testNetwork()">Run Security Test</button>
+                        </div>
+
+                        <div class="sentinel-stat-grid" id="net-results" style="opacity:0.5;">
+                            <div class="sentinel-card" style="align-items:center;">
+                                <div style="font-size:12px;">PING</div>
+                                <div style="font-size:18px; font-weight:bold;">-- ms</div>
+                            </div>
+                            <div class="sentinel-card" style="align-items:center;">
+                                <div style="font-size:12px;">DOWNLOAD</div>
+                                <div style="font-size:18px; font-weight:bold;">-- Mbps</div>
+                            </div>
+                            <div class="sentinel-card" style="align-items:center;">
+                                <div style="font-size:12px;">ENCRYPTION</div>
+                                <div style="font-size:18px; font-weight:bold;">--</div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -2234,6 +3657,10 @@
                         <div class="theme-preview" style="background:linear-gradient(45deg, #88c0d0, #2e3440);"></div>
                         <div class="theme-name">Arctic Ice</div>
                     </div>
+                    <div class="theme-card" onclick="themeManager.setTheme('spiderpunk')">
+                        <div class="theme-preview" style="background:linear-gradient(45deg, #ff3d8b, #00d1ff);"></div>
+                        <div class="theme-name">Spiderpunk</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2262,6 +3689,181 @@
         }
 
         checkAuth()
+
+        /* --- APP: SENTINEL LOGIC --- */
+        const sentinelApp = {
+            vpnConnected: false,
+            scanInProgress: false,
+
+            init: () => {
+                // Generate VPN Map Dots
+                const map = document.getElementById('vpn-map-container');
+                const locs = [
+                    { top: '35%', left: '25%' }, // US
+                    { top: '30%', left: '48%' }, // UK
+                    { top: '35%', left: '85%' }, // JP
+                    { top: '32%', left: '52%' }  // DE
+                ];
+
+                locs.forEach((pos, index) => {
+                    const dot = document.createElement('div');
+                    dot.className = 'vpn-dot';
+                    dot.style.top = pos.top;
+                    dot.style.left = pos.left;
+                    dot.id = `vpn-dot-${index}`;
+                    map.appendChild(dot);
+                });
+
+                // Add to Registry so it can be opened
+                appRegistry['sentinel'] = { name: "Sentinel", icon: "fa-shield-halved", color: "#38bdf8" };
+
+                // Add to Dock (Optional auto-add, or let user add via context menu)
+                if (!dockApps.includes('sentinel')) {
+                    dockApps.push('sentinel');
+                    saveDockApps();
+                    renderDock(); // Ensure renderDock exists in your main code
+                }
+            },
+
+            switchTab: (tabId, btn) => {
+                // Update Sidebar
+                document.querySelectorAll('.sentinel-nav-item').forEach(el => el.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Update View
+                ['dash', 'scan', 'vpn', 'net'].forEach(id => {
+                    document.getElementById(`sen-view-${id}`).classList.add('hidden');
+                });
+                document.getElementById(`sen-view-${tabId}`).classList.remove('hidden');
+            },
+
+            startScan: () => {
+                if (sentinelApp.scanInProgress) return;
+                sentinelApp.scanInProgress = true;
+
+                const btn = document.getElementById('btn-start-scan');
+                const status = document.getElementById('scan-status');
+                const fileTxt = document.getElementById('scan-file');
+                const bar = document.getElementById('scan-bar');
+                const icon = document.getElementById('scan-animation');
+                const list = document.getElementById('threat-list');
+
+                btn.disabled = true;
+                btn.innerText = "Scanning...";
+                status.innerText = "Heuristic Analysis in progress...";
+                icon.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+                list.innerHTML = ''; // Clear previous
+
+                let progress = 0;
+                const fakeFiles = [
+                    "/System32/drivers/etc", "/User/Downloads/suspicious.exe", "/Boot/Config",
+                    "/Kernel/Memory/0x84F", "Checking Registry keys...", "Analyzing Heuristics..."
+                ];
+
+                const interval = setInterval(() => {
+                    progress += Math.random() * 5;
+                    if (progress > 100) progress = 100;
+
+                    bar.style.width = progress + "%";
+                    fileTxt.innerText = fakeFiles[Math.floor(Math.random() * fakeFiles.length)];
+
+                    // Random "Threat" found logic
+                    if (progress > 40 && progress < 50 && document.querySelectorAll('.threat-item').length === 0) {
+                        const threat = document.createElement('div');
+                        threat.className = 'threat-item';
+                        threat.innerHTML = `
+                    <div>
+                        <div style="font-weight:bold; color:#f43f5e;"><i class="fa-solid fa-satellite-dish"></i> Nothing found.</div>
+                    </div>
+                    <button style="background:#f43f5e; border:none; color:white; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="this.parentElement.remove()">Clear</button>
+                 `;
+                        list.appendChild(threat);
+                    }
+
+                    if (progress === 100) {
+                        clearInterval(interval);
+                        sentinelApp.scanInProgress = false;
+                        btn.disabled = false;
+                        btn.innerText = "Quick Scan";
+                        status.innerText = "Scan Complete.";
+                        icon.innerHTML = '<i class="fa-solid fa-check" style="color:#10b981"></i>';
+                        fileTxt.innerText = "Analysis finished.";
+                        notifications.show("Sentinel Scan Finished", "success");
+                    }
+                }, 150);
+            },
+
+            toggleVPN: () => {
+                const btn = document.getElementById('btn-vpn-toggle');
+                const status = document.getElementById('vpn-status-text');
+                const dots = document.querySelectorAll('.vpn-dot');
+                const select = document.getElementById('vpn-loc-select');
+
+                // Map selection index
+                let mapIndex = 0;
+                if (select.value === 'uk') mapIndex = 1;
+                if (select.value === 'jp') mapIndex = 2;
+                if (select.value === 'de') mapIndex = 3;
+
+                sentinelApp.vpnConnected = !sentinelApp.vpnConnected;
+
+                if (sentinelApp.vpnConnected) {
+                    btn.innerText = "Connecting...";
+
+                    setTimeout(() => {
+                        btn.innerText = "Disconnect";
+                        btn.classList.add('connected');
+                        status.innerText = "Connected to " + select.options[select.selectedIndex].text;
+                        status.style.color = "#10b981";
+
+                        // Animate Map
+                        dots.forEach(d => d.classList.remove('active'));
+                        const activeDot = document.getElementById(`vpn-dot-${mapIndex}`);
+                        if (activeDot) activeDot.classList.add('active');
+
+                        notifications.show("VPN Connection Established", "success");
+                    }, 1500);
+                } else {
+                    btn.innerText = "Connect";
+                    btn.classList.remove('connected');
+                    status.innerText = "Disconnected";
+                    status.style.color = "#94a3b8";
+                    dots.forEach(d => d.classList.remove('active'));
+                }
+            },
+
+            testNetwork: () => {
+                const msg = document.getElementById('net-status-msg');
+                const detail = document.getElementById('net-details');
+                const icon = document.getElementById('net-icon');
+                const results = document.getElementById('net-results');
+
+                msg.innerText = "Testing Connection...";
+                icon.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+                results.style.opacity = 0.5;
+
+                setTimeout(() => {
+                    msg.innerText = "Your connection is secure.";
+                    msg.style.color = "#10b981";
+                    detail.innerText = "No MITM attacks or packet leaks detected.";
+                    icon.innerHTML = '<i class="fa-solid fa-shield-halved"></i>';
+                    icon.style.color = "#10b981";
+
+                    results.style.opacity = 1;
+                    const ping = Math.floor(Math.random() * 20) + 10;
+                    const dl = Math.floor(Math.random() * 500) + 100;
+
+                    results.children[0].children[1].innerText = ping + " ms";
+                    results.children[1].children[1].innerText = dl + " Mbps";
+                    results.children[2].children[1].innerText = "WPA3";
+                    results.children[2].children[1].style.color = "#10b981";
+
+                }, 2000);
+            }
+        };
+
+        // Auto-run init to register the app
+        setTimeout(sentinelApp.init, 500);
 
         window.addEventListener("DOMContentLoaded", async () => {
             defaultContextMenuHtml = document.getElementById('context-menu').innerHTML;
@@ -2370,20 +3972,23 @@
 
         const appRegistry = {
             terminal: { name: "Terminal", icon: "fa-terminal", color: "#10b981" },
-            code: { name: "VS Code", icon: "fa-code", color: "#3b82f6" },
-            git: { name: "GitLens", icon: "fa-git-alt", color: "#f97316" },
+            code: { name: "AA Code", icon: "fa-code", color: "#3b82f6" },
+            git: { name: "GitLens", icon: "fa-brands fa-git-alt", color: "#f97316" },
             explorer: { name: "Explorer", icon: "fa-folder-open", color: "#fbbf24" },
-            ai: { name: "AI Assistant", icon: "fa-robot", color: "#8b5cf6" },
-            browser: { name: "Browser", icon: "fa-chrome", color: "#22c55e" },
+            ai: { name: "All on Admin", icon: "fa-bolt", color: "#8b5cf6" },
+            browser: { name: "Browser", icon: "fa-brands fa-chrome", color: "#22c55e" },
+            nexus: { name: "Nexus", icon: "fa-search", color: "#ec4899" }, // Pink
+            sentinel: { name: "Sentinel", icon: "fa-shield-halved", color: "#38bdf8" },
+            photos: { name: "Prism Gallery", icon: "fa-images", color: "#8b5cf6" },
             devtoys: { name: "DevToys", icon: "fa-toolbox", color: "#f59e0b" },
             request: { name: "Request", icon: "fa-satellite-dish", color: "#ff6b6b" },
             sql: { name: "SQL Studio", icon: "fa-database", color: "#48dbfb" },
-            markdown: { name: "Markdown", icon: "fa-markdown", color: "#feca57" },
+            markdown: { name: "Markdown", icon: "fa-brands fa-markdown", color: "#feca57" },
             themes: { name: "Themes", icon: "fa-palette", color: "#a8a29e" },
             settings: { name: "Settings", icon: "fa-gear", color: "#9ca3af" }
         };
 
-        const defaultDockApps = ['terminal', 'code', 'explorer', 'ai', 'browser', 'devtoys', 'request', 'sql', 'markdown', 'themes', 'settings'];
+        const defaultDockApps = ['terminal', 'code', 'explorer', 'flashey', 'browser', 'devtoys', 'request', 'photos', 'nexus', 'themes', 'settings'];
         let dockApps = [];
 
         function loadDockApps() {
@@ -2446,11 +4051,11 @@
                 item.onclick = () => { appManager.open(appId); toggleStartMenu(); };
                 item.oncontextmenu = (event) => showAppContextMenu(event, appId);
                 item.innerHTML = `
-                    <div style="width:40px; height:40px; background:${meta.color}; border-radius:8px; display:flex; align-items:center; justify-content:center; color:white;">
-                        <i class="fa-solid ${meta.icon}"></i>
-                    </div>
-                    <span style="font-size:12px;">${meta.name}</span>
-                `;
+                            <div style="width:40px; height:40px; background:${meta.color}; border-radius:8px; display:flex; align-items:center; justify-content:center; color:white;">
+                                <i class="fa-solid ${meta.icon}"></i>
+                            </div>
+                            <span style="font-size:12px;">${meta.name}</span>
+                        `;
                 container.appendChild(item);
             };
 
@@ -2484,10 +4089,10 @@
             menu.style.left = `${event.clientX}px`;
             menu.style.top = `${event.clientY}px`;
             menu.innerHTML = `
-                <div class="ctx-item" onclick="queueShortcutPlacement('${appId}')">Make Shortcut</div>
-                <div class="ctx-item" onclick="${isPinned ? `unpinAppFromDock('${appId}')` : `pinAppToDock('${appId}')`}">${isPinned ? 'Remove from Taskbar' : 'Pin to Taskbar'}</div>
-                <div class="ctx-item" onclick="appManager.open('${appId}')">Open ${meta.name}</div>
-            `;
+                        <div class="ctx-item" onclick="queueShortcutPlacement('${appId}')">Make Shortcut</div>
+                        <div class="ctx-item" onclick="${isPinned ? `unpinAppFromDock('${appId}')` : `pinAppToDock('${appId}')`}">${isPinned ? 'Remove from Taskbar' : 'Pin to Taskbar'}</div>
+                        <div class="ctx-item" onclick="appManager.open('${appId}')">Open ${meta.name}</div>
+                    `;
         }
 
         function queueShortcutPlacement(appId) {
@@ -2502,6 +4107,596 @@
             notifications.show('Click on the desktop to place the shortcut.', 'success');
             hideContextMenu();
         }
+
+        /* --- FLASHEY (ALL ON ADMIN) LOGIC --- */
+        /* --- FLASHEY: THE ULTIMATE COMPANION --- */
+        const flasheyApp = {
+            config: {
+                name: "Flashey",
+                mode: null,
+                firstRun: true,
+                intensity: 5,
+                installed: [] // Stores IDs of installed addons
+            },
+            intervals: [],
+
+            // Addon Registry
+            addons: {
+                'hivise_core': { name: "Hivise Protocol", icon: "fa-mask", desc: "Unlocks the chaotic Hivise Mode.", type: "mode" },
+                'cute_skin': { name: "Cute Pack", icon: "fa-heart", desc: "Makes Flashey pink and kawaii.", type: "skin" },
+                'widget_mode': { name: "Desktop Buddy", icon: "fa-clone", desc: "Drag Flashey out of the window.", type: "feature" },
+                'focus_helper': { name: "Focus Field", icon: "fa-eye", desc: "Dims background to help you focus.", type: "helper" },
+                'clipboard_pro': { name: "ClipMaster", icon: "fa-clipboard", desc: "Remembers your last 5 copies.", type: "helper" },
+                'screen_shake': { name: "Earthquake", icon: "fa-house-crack", desc: "Hivise Trolls: Screen shake effect.", type: "troll" }
+            },
+
+            init: () => {
+                const saved = localStorage.getItem('flashey_config_v2');
+                if (saved) flasheyApp.config = JSON.parse(saved);
+
+                flasheyApp.render();
+                flasheyApp.applyAddons(); // Apply skins/widgets immediately
+
+                if (flasheyApp.config.mode) flasheyApp.setMode(flasheyApp.config.mode, true);
+
+                // Listener for Code Helper
+                document.addEventListener('keyup', flasheyApp.handleTyping);
+                // Listener for Clipboard Addon
+                document.addEventListener('copy', flasheyApp.handleCopy);
+            },
+
+            save: () => {
+                localStorage.setItem('flashey_config_v2', JSON.stringify(flasheyApp.config));
+            },
+
+            render: () => {
+                // Handle First Run / Onboarding
+                if (flasheyApp.config.firstRun) {
+                    document.getElementById('flashey-onboarding').classList.remove('hidden');
+                    document.getElementById('flashey-dashboard').style.display = 'none';
+                } else {
+                    document.getElementById('flashey-onboarding').classList.add('hidden');
+                    document.getElementById('flashey-dashboard').style.display = 'flex';
+                }
+
+                // Update Names
+                document.getElementById('intro-name').innerText = flasheyApp.config.name;
+                document.getElementById('flashey-display-name').innerText = flasheyApp.config.name;
+                document.getElementById('flashey-rename').value = flasheyApp.config.name;
+
+                // Check Addon Dependencies for UI
+                const hasHivise = flasheyApp.config.installed.includes('hivise_core');
+                document.getElementById('hivise-config-card').style.display = hasHivise ? 'block' : 'none';
+
+                // Lock Hivise Button if not installed
+                const hivBtn = document.querySelector("div[onclick=\"flasheyApp.setMode('hivise')\"]");
+                if (hivBtn) {
+                    if (!hasHivise) {
+                        hivBtn.style.opacity = '0.5';
+                        hivBtn.onclick = () => notifications.show("Install 'Hivise Protocol' from Addons to unlock.", "error");
+                        hivBtn.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;"><span style="color:#ef4444;font-weight:bold;"><i class="fa-solid fa-lock"></i> Hivise Mode</span></div>`;
+                    } else {
+                        hivBtn.style.opacity = '1';
+                        hivBtn.onclick = () => flasheyApp.setMode('hivise');
+                        hivBtn.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;"><span style="color:#ef4444;font-weight:bold;"><i class="fa-solid fa-mask"></i> Hivise Mode</span><div id="ind-hivise" style="width:10px;height:10px;border-radius:50%;background:#333;"></div></div>`;
+                    }
+                }
+            },
+
+            applyAddons: () => {
+                const installed = flasheyApp.config.installed;
+                const mainAvatar = document.getElementById('flashey-avatar');
+                const widget = document.getElementById('flashey-widget');
+
+                // 1. Cute Skin
+                if (installed.includes('cute_skin')) {
+                    mainAvatar.classList.add('skin-cute');
+                    widget.classList.add('skin-cute');
+                } else {
+                    mainAvatar.classList.remove('skin-cute');
+                    widget.classList.remove('skin-cute');
+                }
+
+                // 2. Widget Mode
+                if (installed.includes('widget_mode')) {
+                    // Show toggle in dashboard or just enable the behavior?
+                    // Let's add a button in dashboard to "Pop Out"
+                    let popBtn = document.getElementById('flashey-popout-btn');
+                    if (!popBtn) {
+                        popBtn = document.createElement('button');
+                        popBtn.id = 'flashey-popout-btn';
+                        popBtn.className = 'flashey-btn';
+                        popBtn.style.marginTop = '10px';
+                        popBtn.innerHTML = '<i class="fa-solid fa-up-right-from-square"></i> Switch to Widget';
+                        popBtn.onclick = flasheyApp.toggleWidgetMode;
+                        document.getElementById('flashey-dashboard').appendChild(popBtn);
+                    }
+                }
+            },
+
+            /* --- MODES --- */
+            setMode: (mode, force = false) => {
+                if (!force && flasheyApp.config.mode === mode) {
+                    flasheyApp.stopAll();
+                    flasheyApp.config.mode = null;
+                } else {
+                    flasheyApp.stopAll();
+                    flasheyApp.config.mode = mode;
+                    if (mode === 'helping') flasheyApp.startHelping();
+                    if (mode === 'hivise') flasheyApp.startHivise();
+                }
+                flasheyApp.save();
+                flasheyApp.updateUIState();
+            },
+
+            updateUIState: () => {
+                // Standard UI updates (colors, status text)
+                const avatar = document.getElementById('flashey-avatar');
+                const status = document.getElementById('flashey-status');
+                const indHelp = document.getElementById('ind-helping');
+                const indHiv = document.getElementById('ind-hivise');
+
+                // Reset
+                avatar.classList.remove('mode-helping', 'mode-hivise');
+                if (indHelp) indHelp.style.background = '#333';
+                if (indHiv) indHiv.style.background = '#333';
+
+                if (flasheyApp.config.mode === 'helping') {
+                    avatar.classList.add('mode-helping');
+                    status.innerText = "Systems Optimal. Helping enabled.";
+                    if (indHelp) {
+                        indHelp.style.background = '#38bdf8';
+                        indHelp.style.boxShadow = '0 0 10px #38bdf8';
+                    }
+                } else if (flasheyApp.config.mode === 'hivise') {
+                    avatar.classList.add('mode-hivise');
+                    status.innerText = "Chaos Active.";
+                    if (indHiv) {
+                        indHiv.style.background = '#ef4444';
+                        indHiv.style.boxShadow = '0 0 10px #ef4444';
+                    }
+                } else {
+                    status.innerText = "Standby.";
+                }
+            },
+
+            stopAll: () => {
+                flasheyApp.intervals.forEach(clearInterval);
+                flasheyApp.intervals = [];
+                // Remove Focus Overlay
+                document.getElementById('focus-overlay').style.opacity = 0;
+                // Stop Shake
+                document.body.style.animation = '';
+            },
+
+            /* --- HELPING CORE (ENHANCED) --- */
+            startHelping: () => {
+                const installed = flasheyApp.config.installed;
+                notifications.show(`${flasheyApp.config.name}: I'm here to help!`, 'success');
+
+                // Feature 1: Focus Mode (Addon)
+                if (installed.includes('focus_helper')) {
+                    const overlay = document.getElementById('focus-overlay');
+                    overlay.style.opacity = 1;
+                    // Logic to keep overlay behind active window is handled by CSS z-index management usually
+                    // but for simplicity, we just dim the background.
+                }
+
+                // Feature 2: Smart Suggestions (Core)
+                // (Existing typing logic in handleTyping)
+            },
+
+            handleTyping: (e) => {
+                if (flasheyApp.config.mode !== 'helping') return;
+
+                // Basic Auto-Finishers
+                const active = document.activeElement;
+                if (active.tagName === 'TEXTAREA' || (active.tagName === 'INPUT' && active.type === 'text')) {
+                    const val = active.value;
+
+                    // Auto Close Brackets
+                    if (e.key === '{') { /* insert } */ }
+                    if (e.key === '(') { /* insert ) */ }
+
+                    // Code Helper Popup logic (Simplified)
+                    if (val.endsWith('function')) {
+                        flasheyApp.showHelperPopup(active, "Generate function boilerplate? (Press Tab)");
+                        active.onkeydown = (k) => {
+                            if (k.key === 'Tab') {
+                                k.preventDefault();
+                                const snippet = " name() {\n    // code here\n}";
+                                active.setRangeText(snippet, active.selectionStart, active.selectionEnd, "end");
+                                document.getElementById('flashey-helper-popup').style.display = 'none';
+                                active.onkeydown = null;
+                            }
+                        }
+                    }
+                }
+            },
+
+            handleCopy: (e) => {
+                if (flasheyApp.config.mode === 'helping' && flasheyApp.config.installed.includes('clipboard_pro')) {
+                    const selection = document.getSelection().toString();
+                    if (selection) {
+                        notifications.show("Saved to ClipMaster", "success");
+                        // In a real app, you'd store this in an array to paste later
+                    }
+                }
+            },
+
+            showHelperPopup: (target, text) => {
+                const popup = document.getElementById('flashey-helper-popup');
+                if (!popup) return;
+                const rect = target.getBoundingClientRect();
+                popup.style.left = rect.left + 'px';
+                popup.style.bottom = (window.innerHeight - rect.top + 10) + 'px';
+                popup.style.display = 'block';
+                popup.innerText = text;
+                setTimeout(() => popup.style.display = 'none', 5000);
+            },
+
+            /* --- HIVISE MODE (ADDON LOCKED) --- */
+            startHivise: () => {
+                if (!flasheyApp.config.installed.includes('hivise_core')) return;
+
+                notifications.show("Hivise: Let the games begin.", "warning");
+                const intensity = flasheyApp.config.intensity;
+
+                const loop = setInterval(() => {
+                    const roll = Math.random() * 100;
+
+                    // 1. Screen Shake (Addon)
+                    if (flasheyApp.config.installed.includes('screen_shake') && roll < 10) {
+                        document.body.style.animation = "shake 0.5s";
+                        setTimeout(() => document.body.style.animation = '', 500);
+                    }
+
+                    // 2. Random Pigeons (Core Hivise)
+                    if (roll > 20 && roll < 35) flasheyApp.spawnPigeon();
+
+                    // 3. Troll Windows (Core Hivise)
+                    if (roll > 50 && roll < 50 + (intensity * 2)) flasheyApp.spawnTrollWindow();
+
+                }, 12000 - (intensity * 1000));
+
+                flasheyApp.intervals.push(loop);
+            },
+
+            spawnPigeon: () => {
+                const img = document.createElement('img');
+                img.src = "https://cdn.pixabay.com/photo/2020/02/27/13/21/rock-dove-4884627_1280.jpg";
+                img.className = "pigeon-overlay";
+                img.style.top = Math.random() * (window.innerHeight - 200) + 'px';
+                document.body.appendChild(img);
+                setTimeout(() => img.remove(), 4000);
+            },
+
+            spawnTrollWindow: () => {
+                // Same troll window logic as before
+                const div = document.createElement('div');
+                div.className = "window";
+                div.style = `left:${Math.random() * (window.innerWidth - 300)}px; top:${Math.random() * (window.innerHeight - 200)}px; width:300px; z-index:9000; position:absolute;`;
+                div.innerHTML = `
+            <div class="title-bar" style="background:#ef4444;"><div class="win-title">OOPS</div></div>
+            <div class="window-content" style="padding:20px; background:#18181b; color:white;">
+                Deleting System32... <br>
+                <div style="background:#333; height:5px; width:100%; margin-top:10px;"><div style="background:red; height:100%; width:${Math.random() * 100}%"></div></div>
+            </div>`;
+                document.body.appendChild(div);
+                setTimeout(() => div.remove(), 4000);
+            },
+
+            /* --- WIDGET LOGIC --- */
+            toggleWidgetMode: () => {
+                const win = document.getElementById('win-flashey');
+                const widget = document.getElementById('flashey-widget');
+
+                if (win.classList.contains('hidden')) {
+                    // Restore Window
+                    win.classList.remove('hidden');
+                    widget.style.display = 'none';
+                } else {
+                    // Go to Widget
+                    win.classList.add('hidden');
+                    widget.style.display = 'flex';
+                    widget.style.left = (window.innerWidth - 150) + 'px';
+                    widget.style.top = '50px';
+
+                    // Widget Interaction
+                    widget.ondblclick = () => flasheyApp.toggleWidgetMode(); // Dbl click to open app
+                }
+            },
+
+            // Core helpers
+            completeOnboarding: () => { flasheyApp.config.firstRun = false; flasheyApp.save(); flasheyApp.render(); },
+            rename: (n) => { flasheyApp.config.name = n; flasheyApp.save(); flasheyApp.render(); },
+            toggleSettings: () => {
+                const el = document.getElementById('flashey-settings');
+                el.style.transform = el.style.transform === 'translateX(0%)' ? 'translateX(100%)' : 'translateX(0%)';
+            },
+            reset: () => {
+                localStorage.removeItem('flashey_config_v2');
+                location.reload();
+            }
+        };
+
+        /* --- APP: NEXUS (Finder/Search Engine) --- */
+        const nexusApp = {
+            isOpen: false,
+
+            toggle() {
+                const win = document.getElementById('win-nexus');
+                const input = document.getElementById('nexus-input');
+                if (!win) return;
+
+                win.classList.toggle('hidden');
+                this.isOpen = !win.classList.contains('hidden');
+
+                if (this.isOpen) {
+                    win.style.left = '50%';
+                    win.style.top = '100px';
+                    win.style.transform = 'translateX(-50%)';
+                    input.value = '';
+                    input.focus();
+                    this.search('');
+                }
+            },
+
+            search(query) {
+                const container = document.getElementById('nexus-results');
+                if (!container) return;
+
+                container.innerHTML = '';
+                const q = query.toLowerCase();
+
+                if (window.appRegistry) {
+                    const apps = Object.entries(appRegistry)
+                        .map(([id, app]) => ({
+                            id,
+                            app,
+                            score: q && app.name.toLowerCase().includes(q) ? 1 : 0
+                        }))
+                        .sort((a, b) => b.score - a.score);
+
+                    apps.forEach(({ id, app }) => {
+                        if (q && !app.name.toLowerCase().includes(q)) return;
+
+                        this.createResultItem(
+                            container,
+                            app.icon,
+                            app.name,
+                            "Application",
+                            () => {
+                                appManager.open(id);
+                                this.toggle();
+                            },
+                            app.color
+                        );
+                    });
+                }
+
+                if (q.length > 0) {
+                    this.createResultItem(
+                        container,
+                        "fa-globe",
+                        `Search Google`,
+                        query,
+                        () => this.openBrowserSearch(query),
+                        "#3b82f6"
+                    );
+                }
+            },
+
+            openBrowserSearch(query) {
+                const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+
+                appManager.open('browser');
+
+                if (window.browserApp?.navigate) {
+                    browserApp.navigate(url);
+                } else {
+                    const input = document.getElementById('browser-url');
+                    const frame = document.getElementById('browser-frame');
+                    if (input && frame) {
+                        input.value = url;
+                        frame.src = url;
+                    }
+                }
+
+                this.toggle();
+            },
+
+            createResultItem(container, icon, title, subtitle, onClick, color) {
+                const el = document.createElement('div');
+                el.className = 'nexus-item';
+                el.onclick = onClick;
+
+                el.innerHTML = `
+            <div style="font-size:24px;color:${color};width:40px;text-align:center">
+                <i class="fa-solid ${icon}"></i>
+            </div>
+            <div style="flex:1">
+                <div style="font-size:16px;font-weight:500;color:#fff">${title}</div>
+                <div style="font-size:12px;color:#a1a1aa">${subtitle}</div>
+            </div>
+            <i class="fa-solid fa-arrow-right" style="color:#52525b"></i>
+        `;
+
+                container.appendChild(el);
+            },
+
+            handleKey(e) {
+                if (e.key === 'Escape') this.toggle();
+                if (e.key === 'Enter') {
+                    document.querySelector('.nexus-item')?.click();
+                }
+            }
+        };
+
+        /* --- SAFE appManager hook --- */
+        if (window.appManager?.open) {
+            const _open = appManager.open.bind(appManager);
+            appManager.open = (id) => {
+                if (id === 'nexus') {
+                    nexusApp.toggle();
+                    return;
+                }
+                _open(id);
+            };
+        }
+
+
+        const prismApp = {
+            stream: null,
+
+            async loadLibrary() {
+                if (!window.ipcRenderer) return;
+
+                const grid = document.getElementById('prism-grid');
+                if (!grid || grid.dataset.loaded === 'true') return;
+
+                const result = await ipcRenderer.invoke('photos-get-library');
+                grid.innerHTML = '';
+
+                if (result?.error) {
+                    grid.innerHTML = `<div style="padding:20px;color:var(--danger)">${result.error}</div>`;
+                    return;
+                }
+
+                result.images?.forEach(img => {
+                    const card = document.createElement('div');
+                    card.className = 'prism-img-card';
+                    card.onclick = () => {
+                        document.getElementById('desktop')?.style.setProperty(
+                            'background-image',
+                            `url('${img.src}')`
+                        );
+                        notifications?.show?.("Wallpaper Updated", "success");
+                    };
+                    card.innerHTML = `<img src="${img.src}" loading="lazy">`;
+                    grid.appendChild(card);
+                });
+
+                grid.dataset.loaded = 'true';
+            },
+
+            async startCamera() {
+                const video = document.getElementById('camera-feed');
+                if (!video) return;
+
+                try {
+                    this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    video.srcObject = this.stream;
+                } catch {
+                    notifications?.show?.("Camera unavailable", "danger");
+                }
+            },
+
+            stopCamera() {
+                this.stream?.getTracks().forEach(t => t.stop());
+                this.stream = null;
+            }
+        };
+
+        if (window.appManager?.close) {
+            const _close = appManager.close.bind(appManager);
+            appManager.close = (id) => {
+                if (id === 'photos') prismApp.stopCamera();
+                _close(id);
+            };
+        }
+
+
+        /* --- ADDON STORE LOGIC --- */
+        const flasheyStore = {
+            open: () => {
+                document.getElementById('win-flashey-store').classList.remove('hidden');
+                appManager.bringToFront('flashey-store'); // Ensure you have this capability or manually set zIndex
+                flasheyStore.render();
+            },
+
+            filter: (query) => {
+                flasheyStore.render(query.toLowerCase());
+            },
+
+            render: (filter = "") => {
+                const grid = document.getElementById('flashey-store-list');
+                grid.innerHTML = "";
+
+                Object.keys(flasheyApp.addons).forEach(id => {
+                    const addon = flasheyApp.addons[id];
+                    if (filter && !addon.name.toLowerCase().includes(filter)) return;
+
+                    const isInstalled = flasheyApp.config.installed.includes(id);
+
+                    const card = document.createElement('div');
+                    card.className = "addon-card";
+                    card.innerHTML = `
+                <i class="fa-solid ${addon.icon} addon-icon"></i>
+                <div class="addon-title">${addon.name}</div>
+                <div class="addon-desc">${addon.desc}</div>
+                <button class="install-btn ${isInstalled ? 'installed' : ''}" onclick="flasheyStore.install('${id}', this)">
+                    ${isInstalled ? 'Installed' : 'Download'}
+                </button>
+                <div class="dl-bar"></div>
+            `;
+                    grid.appendChild(card);
+                });
+            },
+
+            install: (id, btn) => {
+                // Simulate Download
+                const card = btn.parentElement;
+                const bar = card.querySelector('.dl-bar');
+                btn.innerText = "Downloading...";
+                btn.style.opacity = 0.7;
+
+                let progress = 0;
+                const int = setInterval(() => {
+                    progress += Math.random() * 20;
+                    bar.style.width = progress + '%';
+
+                    if (progress >= 100) {
+                        clearInterval(int);
+                        flasheyApp.config.installed.push(id);
+                        flasheyApp.save();
+                        flasheyApp.render(); // Re-render main UI to unlock things
+                        flasheyApp.applyAddons(); // Apply visual changes
+
+                        btn.innerText = "Installed";
+                        btn.classList.add('installed');
+                        btn.style.opacity = 1;
+                        bar.style.width = '0%';
+
+                        notifications.show(`Addon "${flasheyApp.addons[id].name}" installed!`, "success");
+                    }
+                }, 200);
+            }
+        };
+
+        // --- INITIALIZATION ---
+        // Add 'flashey-store' to your appRegistry if you want it in the window list, 
+        // or just treat it as a sub-window.
+        setTimeout(flasheyApp.init, 1000);
+
+        // Add keyframes for shake
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+        @keyframes shake {
+          0% { transform: translate(1px, 1px) rotate(0deg); }
+          10% { transform: translate(-1px, -2px) rotate(-1deg); }
+          20% { transform: translate(-3px, 0px) rotate(1deg); }
+          30% { transform: translate(3px, 2px) rotate(0deg); }
+          40% { transform: translate(1px, -1px) rotate(1deg); }
+          50% { transform: translate(-1px, 2px) rotate(-1deg); }
+          60% { transform: translate(-3px, 1px) rotate(0deg); }
+          70% { transform: translate(3px, 1px) rotate(-1deg); }
+          80% { transform: translate(-1px, -1px) rotate(1deg); }
+          90% { transform: translate(1px, 2px) rotate(0deg); }
+          100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        `;
+        document.head.appendChild(styleSheet);
 
         // --- REAL FILE SYSTEM INTEGRATION ---
         const explorerApp = {
@@ -2582,9 +4777,9 @@
 
                     // HTML Structure matching your CSS
                     el.innerHTML = `
-                        <div class="f-img"><i class="fa-solid ${iconClass}" style="color: ${color}"></i></div>
-                        <div class="f-name">${file.name}</div>
-                    `;
+                                <div class="f-img"><i class="fa-solid ${iconClass}" style="color: ${color}"></i></div>
+                                <div class="f-name">${file.name}</div>
+                            `;
 
                     // Double Click to Open/Enter
                     el.ondblclick = () => {
@@ -2766,43 +4961,43 @@
             applyAdBlocker: (force = false) => {
                 if (!browserApp.view || (!browserApp.adBlockerEnabled && !force)) return;
                 const adBlockScript = `
-                        (function(){
-                            const selectors = [
-                                'iframe[src*="ad"]',
-                                '[id*="ad-"]',
-                                '[class*="ad-"]',
-                                '[class*="ads"]',
-                                '[data-ad]',
-                                'ytd-display-ad-renderer',
-                                'ytd-promoted-video-renderer',
-                                'ytd-infeed-ad-layout-renderer',
-                                '.video-ads',
-                                '.ytp-ad-player-overlay'
-                            ];
-                            selectors.forEach(sel => {
-                                document.querySelectorAll(sel).forEach(el => el.remove());
-                            });
-                        })();
-                    `;
+                                (function(){
+                                    const selectors = [
+                                        'iframe[src*="ad"]',
+                                        '[id*="ad-"]',
+                                        '[class*="ad-"]',
+                                        '[class*="ads"]',
+                                        '[data-ad]',
+                                        'ytd-display-ad-renderer',
+                                        'ytd-promoted-video-renderer',
+                                        'ytd-infeed-ad-layout-renderer',
+                                        '.video-ads',
+                                        '.ytp-ad-player-overlay'
+                                    ];
+                                    selectors.forEach(sel => {
+                                        document.querySelectorAll(sel).forEach(el => el.remove());
+                                    });
+                                })();
+                            `;
                 const youtubeScript = `
-                        (function(){
-                            if (window.__coreAdBlockInterval) return;
-                            window.__coreAdBlockInterval = setInterval(function(){
-                                try {
-                                    const video = document.querySelector('video');
-                                    if (!video) return;
-                                    const skip = document.querySelector('.ytp-ad-skip-button-modern, .ytp-ad-skip-button');
-                                    const isAd = document.body.classList.contains('ad-showing') || document.querySelector('.ad-showing');
-                                    if (isAd && video.duration) {
-                                        video.currentTime = video.duration;
-                                    }
-                                    if (skip) {
-                                        skip.click();
-                                    }
-                                } catch (e) {}
-                            }, 1500);
-                        })();
-                    `;
+                                (function(){
+                                    if (window.__coreAdBlockInterval) return;
+                                    window.__coreAdBlockInterval = setInterval(function(){
+                                        try {
+                                            const video = document.querySelector('video');
+                                            if (!video) return;
+                                            const skip = document.querySelector('.ytp-ad-skip-button-modern, .ytp-ad-skip-button');
+                                            const isAd = document.body.classList.contains('ad-showing') || document.querySelector('.ad-showing');
+                                            if (isAd && video.duration) {
+                                                video.currentTime = video.duration;
+                                            }
+                                            if (skip) {
+                                                skip.click();
+                                            }
+                                        } catch (e) {}
+                                    }, 1500);
+                                })();
+                            `;
                 browserApp.view.executeJavaScript(adBlockScript, true);
                 browserApp.view.executeJavaScript(youtubeScript, true);
             }
@@ -2817,6 +5012,8 @@
         /* --- SYSTEM CONFIG & PERSISTENCE --- */
         const systemConfig = {
             state: {
+                username: "Senior Dev",
+                userTitle: "Core OS Security",
                 accent: '#6366f1',
                 glassOpacity: 0.6,
                 glassBlur: '20px',
@@ -2825,14 +5022,22 @@
                 visualStyle: 'glass',
                 showSeconds: false,
                 adBlockerEnabled: false,
-                customWallpaperUrl: null
+                customWallpaperUrl: null,
+                passwordEnabled: false,
+                passwordValue: '',
+                swipeToUnlock: false,
+                themeName: 'default'
             },
 
             init() {
                 // Load settings from local storage
                 const saved = localStorage.getItem('core_os_config');
                 if (saved) {
-                    this.state = JSON.parse(saved);
+                    this.state = { ...this.state, ...JSON.parse(saved) };
+                }
+                if (document.getElementById('set-username')) {
+                    document.getElementById('set-username').value = this.state.username;
+                    document.getElementById('set-title').value = this.state.userTitle;
                 }
                 if (window.pendingInstallerConfig) {
                     const config = window.pendingInstallerConfig;
@@ -2844,14 +5049,43 @@
                     }
                 }
                 this.apply();
+                this.updateProfilePreview();
             },
 
             save() {
                 localStorage.setItem('core_os_config', JSON.stringify(this.state));
             },
 
+            updateProfilePreview() {
+                // Real-time preview in settings
+                const newName = document.getElementById('set-username').value || "User";
+                const newTitle = document.getElementById('set-title').value || "Operator";
+                document.getElementById('preview-username').innerText = newName;
+                document.getElementById('preview-title').innerText = newTitle;
+            },
+
+            saveProfile() {
+                const newName = document.getElementById('set-username').value.trim();
+                const newTitle = document.getElementById('set-title').value.trim();
+
+                if (!newName) {
+                    notifications.show("Username cannot be empty", "warning");
+                    return;
+                }
+
+                this.state.username = newName;
+                this.state.userTitle = newTitle;
+                this.save();
+                this.apply(); // Updates login screen
+                terminalApp.init(); // Updates terminal prompt
+                notifications.show("Profile Updated", "success");
+            },
+
             apply() {
                 const r = document.documentElement;
+                if (themeManager && themeManager.applyTheme) {
+                    themeManager.applyTheme(this.state.themeName);
+                }
                 r.style.setProperty('--accent', this.state.accent);
                 r.style.setProperty('--accent-hover', this.state.accent);
                 r.style.setProperty('--glass-opacity', this.state.glassOpacity);
@@ -2874,6 +5108,24 @@
                 if (toggleSeconds) toggleSeconds.checked = this.state.showSeconds;
                 const toggleAdblock = document.getElementById('toggle-adblock');
                 if (toggleAdblock) toggleAdblock.checked = this.state.adBlockerEnabled;
+                const togglePasswordRequired = document.getElementById('toggle-password-required');
+                if (togglePasswordRequired) togglePasswordRequired.checked = this.state.passwordEnabled;
+                const toggleSwipeUnlock = document.getElementById('toggle-swipe-unlock');
+                if (toggleSwipeUnlock) toggleSwipeUnlock.checked = this.state.swipeToUnlock;
+                const passwordStatus = document.getElementById('password-status');
+                if (passwordStatus) {
+                    passwordStatus.innerText = this.state.passwordEnabled
+                        ? (this.state.passwordValue ? 'Password enabled.' : 'Password enabled. Set a password to lock.')
+                        : 'Password disabled. Any password will unlock.';
+                }
+                const loginSwipeUi = document.getElementById('login-swipe-ui');
+                if (loginSwipeUi) loginSwipeUi.classList.toggle('hidden', !this.state.swipeToUnlock);
+                const loginInput = document.getElementById('password-input');
+                if (loginInput) {
+                    loginInput.placeholder = this.state.passwordEnabled
+                        ? 'Enter Password'
+                        : 'Enter Password (any)';
+                }
                 const glassBtn = document.getElementById('style-glass');
                 const prismBtn = document.getElementById('style-prism');
                 if (glassBtn && prismBtn) {
@@ -2881,17 +5133,27 @@
                     prismBtn.classList.toggle('active', this.state.visualStyle === 'prism');
                 }
                 const desktop = document.getElementById('desktop');
-                if (desktop && typeof wallpapers !== 'undefined') {
+                const loginScreen = document.getElementById('login-screen');
+                const shouldApplyWallpaper = this.state.themeName === 'default' || !!this.state.customWallpaperUrl;
+                if (desktop && typeof wallpapers !== 'undefined' && shouldApplyWallpaper) {
                     if (this.state.customWallpaperUrl) {
                         if (!wallpapers.includes(this.state.customWallpaperUrl)) {
                             wallpapers.unshift(this.state.customWallpaperUrl);
                             this.state.wallpaperIndex = 0;
                         }
                     }
-                    desktop.style.backgroundImage = `url('${wallpapers[this.state.wallpaperIndex]}')`;
+                    const activeWallpaper = wallpapers[this.state.wallpaperIndex];
+                    desktop.style.backgroundImage = `url('${activeWallpaper}')`;
+                    if (loginScreen) loginScreen.style.backgroundImage = `url('${activeWallpaper}')`;
                 }
                 if (browserApp && browserApp.setAdBlocker) {
                     browserApp.setAdBlocker(this.state.adBlockerEnabled);
+                }
+
+                const loginCard = document.querySelector('.login-card');
+                if (loginCard) {
+                    loginCard.querySelector('h2').innerText = this.state.username;
+                    loginCard.querySelector('p').innerText = this.state.userTitle;
                 }
             },
 
@@ -2943,6 +5205,49 @@
                 this.save();
                 this.apply();
                 notifications.show(enabled ? 'Ad Blocker enabled' : 'Ad Blocker disabled', 'success');
+            },
+
+            setPasswordEnabled(enabled) {
+                this.state.passwordEnabled = enabled;
+                this.save();
+                this.apply();
+                notifications.show(enabled ? 'Password required on unlock.' : 'Password disabled. Any password works.', enabled ? 'success' : 'warning');
+            },
+
+            updatePassword() {
+                const input = document.getElementById('password-setting');
+                if (!input) return;
+                const value = input.value.trim();
+                if (!value) {
+                    notifications.show('Password cannot be empty.', 'warning');
+                    return;
+                }
+                this.state.passwordValue = value;
+                this.save();
+                this.apply();
+                input.value = '';
+                notifications.show('Password saved.', 'success');
+            },
+
+            setSwipeToUnlock(enabled) {
+                this.state.swipeToUnlock = enabled;
+                this.save();
+                this.apply();
+                notifications.show(enabled ? 'Swipe to unlock enabled.' : 'Swipe to unlock disabled.', 'success');
+            },
+
+            setTheme(themeName) {
+                this.state.themeName = themeName;
+                if (themeName === 'matrix') this.state.accent = '#00ff41';
+                if (themeName === 'synth') this.state.accent = '#ff00ff';
+                if (themeName === 'nord') this.state.accent = '#88c0d0';
+                if (themeName === 'spiderpunk') this.state.accent = '#ff3d8b';
+                if (themeName === 'default') this.state.accent = '#6366f1';
+                else {
+                    this.state.customWallpaperUrl = null;
+                }
+                this.save();
+                this.apply();
             },
 
             rebootInstaller: async () => {
@@ -3403,118 +5708,154 @@
         // Run this immediately on all windows (Main and Secondary)
         setInterval(updateClock, 1000);
 
-        // --- TERMINAL LOGIC ---
-        const termInput = document.getElementById('term-input');
-        termInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                const cmd = termInput.value.trim();
-                const container = document.getElementById('term-body');
+        const terminalApp = {
+            history: [],
+            historyIndex: -1,
 
-                // Add command to history
+            init() {
+                const termInput = document.getElementById('term-input');
+                if (!termInput) return;
+
+                this.updatePrompt();
+
+                termInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        const cmd = termInput.value.trim();
+                        this.execute(cmd);
+                        this.history.push(cmd);
+                        this.historyIndex = -1;
+                        termInput.value = '';
+                    }
+                    // Command History (Up Arrow)
+                    else if (e.key === 'ArrowUp') {
+                        if (this.history.length > 0) {
+                            if (this.historyIndex < this.history.length - 1) {
+                                this.historyIndex++;
+                                termInput.value = this.history[this.history.length - 1 - this.historyIndex];
+                            }
+                        }
+                    }
+                    // Command History (Down Arrow)
+                    else if (e.key === 'ArrowDown') {
+                        if (this.historyIndex > 0) {
+                            this.historyIndex--;
+                            termInput.value = this.history[this.history.length - 1 - this.historyIndex];
+                        } else {
+                            this.historyIndex = -1;
+                            termInput.value = '';
+                        }
+                    }
+                });
+            },
+
+            updatePrompt() {
+                const prompt = document.querySelector('.term-prompt');
+                if (prompt) {
+                    const cleanName = systemConfig.state.username.toLowerCase().replace(/\s/g, '_');
+                    prompt.innerText = `${cleanName}@CORE:~$`;
+                }
+            },
+
+            execute(cmd) {
+                const container = document.getElementById('term-body');
+                const inputLine = document.getElementById('term-input').parentElement;
+                const cleanName = systemConfig.state.username.toLowerCase().replace(/\s/g, '_');
+
+                // Print Command
                 const line = document.createElement('div');
                 line.className = 'term-output';
-                line.innerHTML = `<span class="term-prompt">user@core:~$</span>${cmd}`;
-                container.insertBefore(line, termInput.parentElement);
+                line.innerHTML = `<span class="term-prompt">${cleanName}@CORE:~$</span> ${cmd}`;
+                container.insertBefore(line, inputLine);
 
                 const output = document.createElement('div');
                 output.className = 'term-output';
 
-                // Command Parser
                 const args = cmd.split(' ');
                 const command = args[0].toLowerCase();
 
                 switch (command) {
                     case 'help':
                         output.innerHTML = `
-                <div style="color:var(--accent); font-weight:bold; margin-bottom:5px;">CORE OS HELPER v1.0</div>
-                <div>Available Commands:</div>
-                <table style="width:100%; text-align:left; margin-top:5px;">
-                    <tr><td style="color:#6be585">ls</td><td>List directory contents</td></tr>
-                    <tr><td style="color:#6be585">cat [file]</td><td>Read file content</td></tr>
-                    <tr><td style="color:#6be585">touch [file]</td><td>Create new empty file</td></tr>
-                    <tr><td style="color:#6be585">rm [file]</td><td>Remove file</td></tr>
-                    <tr><td style="color:#6be585">node [file]</td><td>Execute JavaScript file</td></tr>
-                    <tr><td style="color:#6be585">date</td><td>Show system time</td></tr>
-                    <tr><td style="color:#6be585">clear</td><td>Clear terminal screen</td></tr>
-                </table>
-            `;
+                            <div style="color:var(--accent)">CORE TERMINAL [Version 1.2]</div>
+                            <div style="margin: 5px 0;">Available Commands:</div>
+                            <div style="display:grid; grid-template-columns: 100px 1fr; gap: 5px;">
+                                <span>cls / clear</span> <span>Clear screen</span>
+                                <span>dir / ls</span>   <span>List files</span>
+                                <span>ver</span>        <span>System version</span>
+                                <span>whoami</span>     <span>Show current user</span>
+                                <span>echo [msg]</span> <span>Display text</span>
+                                <span>exit</span>       <span>Close terminal</span>
+                                <span>color [hex]</span><span>Change accent color</span>
+                            </div>`;
                         break;
-                    case 'date':
-                        output.innerText = new Date().toString();
+                    case 'whoami':
+                        output.innerText = `${systemConfig.state.username} (Administrator)`;
                         break;
+                    case 'ver':
+                        output.innerText = "Core OS Professional [Build 22H2.10.0.1]";
+                        break;
+                    case 'cls':
                     case 'clear':
-                        container.innerHTML = '';
-                        container.appendChild(termInput.parentElement); // Re-add input
-                        termInput.value = '';
-                        termInput.focus();
-                        return; // Exit
+                        const lines = container.querySelectorAll('.term-output');
+                        lines.forEach(l => l.remove());
+                        return;
+                    case 'dir':
                     case 'ls':
                         output.innerText = fileSystem.listFiles().join('    ');
                         output.style.color = '#82aaff';
                         break;
-                    case 'whoami':
-                        output.innerText = "root";
+                    case 'echo':
+                        output.innerText = args.slice(1).join(' ');
                         break;
-                    case 'cat':
+                    case 'color':
                         if (args[1]) {
-                            const content = fileSystem.readFile(args[1]);
-                            if (content !== null) output.innerText = content;
-                            else output.innerText = `cat: ${args[1]}: No such file`;
-                        } else output.innerText = "Usage: cat [filename]";
+                            systemConfig.state.accent = args[1];
+                            systemConfig.apply();
+                            output.innerText = "Accent color updated.";
+                        } else {
+                            output.innerText = "Usage: color [hex_code]";
+                        }
                         break;
-                    case 'touch':
-                        if (args[1]) {
-                            fileSystem.writeFile(args[1], '');
-                            output.innerText = `Created ${args[1]}`;
-                            output.style.color = 'var(--success)';
-                        } else output.innerText = "Usage: touch [filename]";
-                        break;
-                    case 'rm':
-                        if (args[1]) {
-                            fileSystem.deleteFile(args[1]);
-                            output.innerText = `Deleted ${args[1]}`;
+                    case 'exit':
+                        appManager.close('terminal');
+                        return;
+                    default:
+                        if (cmd !== "") {
+                            output.innerText = `'${command}' is not recognized as an internal or external command.`;
                             output.style.color = 'var(--danger)';
                         }
-                        break;
-                    case 'node':
-                        if (args[1]) {
-                            const code = fileSystem.readFile(args[1]);
-                            if (code) {
-                                try {
-                                    output.innerText = "> Execution Result:\n";
-                                    // VERY BASIC EVAL SIMULATION (Safe-ish)
-                                    // We override console.log for this execution
-                                    const originalLog = console.log;
-                                    let logs = [];
-                                    console.log = (...m) => logs.push(m.join(' '));
-                                    try {
-                                        eval(code);
-                                    } catch (e) { logs.push(e.message); }
-                                    console.log = originalLog;
-                                    output.innerText += logs.join('\n');
-                                } catch (e) {
-                                    output.innerText = "Error executing file.";
-                                }
-                            } else output.innerText = `node: ${args[1]}: File not found`;
-                        }
-                        break;
-                    default:
-                        if (cmd !== "") output.innerText = `bash: ${command}: command not found`;
                 }
 
-                if (output.innerText !== "") container.insertBefore(output, termInput.parentElement);
-                termInput.value = '';
+                if (output.innerHTML !== "") container.insertBefore(output, inputLine);
                 container.scrollTop = container.scrollHeight;
             }
-        });
+        };
+
+        // Start Terminal Logic
+        terminalApp.init();
 
 
         /* --- UPGRADE 2: THEME MANAGER --- */
         const themeManager = {
-            setTheme: (themeName) => {
+            applyTheme: (themeName) => {
                 const root = document.documentElement;
+                const desktop = document.getElementById('desktop');
+                const loginScreen = document.getElementById('login-screen');
+                const setLoginBackground = (url) => {
+                    if (desktop) desktop.style.backgroundImage = `url('${url}')`;
+                    if (loginScreen && url) loginScreen.style.backgroundImage = `url('${url}')`;
+                };
 
-                if (themeName === 'matrix') {
+                if (themeName === 'spiderpunk') {
+                    root.style.setProperty('--accent', '#ff3d8b');
+                    root.style.setProperty('--bg-os', '#0d0b12');
+                    root.style.setProperty('--bg-window', '#1a0f1f');
+                    // Using a cool, actual Spider-verse style image
+                    const spiderpunkWallpaper = 'https://wallpaperbat.com/img/63152633-spider-punk-wallpaper.jpg';
+                    document.getElementById('desktop').style.backgroundImage = `url('${spiderpunkWallpaper}')`;
+                    setLoginBackground(spiderpunkWallpaper);
+                }
+                else if (themeName === 'matrix') {
                     root.style.setProperty('--accent', '#00ff41');
                     root.style.setProperty('--bg-os', '#000000');
                     root.style.setProperty('--bg-window', '#0d0d0d');
@@ -3523,29 +5864,43 @@
                     // Set Matrix Wallpaper (Static fallback if canvas fails)
                     document.getElementById('desktop').style.backgroundImage = 'none';
                     document.getElementById('desktop').style.backgroundColor = 'black';
+                    if (loginScreen) loginScreen.style.backgroundImage = 'none';
                 } else if (themeName === 'synth') {
                     root.style.setProperty('--accent', '#ff00ff');
                     root.style.setProperty('--bg-os', '#12001f');
                     root.style.setProperty('--bg-window', '#1f002e');
                     root.style.setProperty('--font-ui', "'Inter', sans-serif");
-                    document.getElementById('desktop').style.backgroundImage = "url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070')";
+                    const synthWallpaper = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070';
+                    document.getElementById('desktop').style.backgroundImage = `url('${synthWallpaper}')`;
+                    setLoginBackground(synthWallpaper);
                 } else if (themeName === 'nord') {
                     root.style.setProperty('--accent', '#88c0d0');
                     root.style.setProperty('--bg-os', '#2e3440');
                     root.style.setProperty('--bg-window', '#3b4252');
                     root.style.setProperty('--font-ui', "'Inter', sans-serif");
-                    document.getElementById('desktop').style.backgroundImage = "url('https://images.unsplash.com/photo-1483058712412-4245e9b90334?q=80&w=2070')";
+                    const nordWallpaper = 'https://images.unsplash.com/photo-1483058712412-4245e9b90334?q=80&w=2070';
+                    document.getElementById('desktop').style.backgroundImage = `url('${nordWallpaper}')`;
+                    setLoginBackground(nordWallpaper);
                 } else {
                     // Default
                     root.style.setProperty('--accent', '#6366f1');
                     root.style.setProperty('--bg-os', '#050505');
                     root.style.setProperty('--bg-window', '#09090b');
                     root.style.setProperty('--font-ui', "'Inter', sans-serif");
-                    document.getElementById('desktop').style.backgroundImage = "url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574')";
+                    const defaultWallpaper = 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574';
+                    document.getElementById('desktop').style.backgroundImage = `url('${defaultWallpaper}')`;
+                    setLoginBackground(defaultWallpaper);
+                }
+            },
+            setTheme: (themeName) => {
+                themeManager.applyTheme(themeName);
+                // Save to system config so it persists
+                if (typeof systemConfig !== 'undefined') {
+                    systemConfig.state.themeName = themeName;
+                    systemConfig.save();
                 }
             }
         };
-
 
         /* --- UPGRADE 3: MATRIX SCREENSAVER --- */
         const screensaver = {
@@ -3643,6 +5998,7 @@
                 document.getElementById('boot-layer').classList.add('hidden');
                 document.getElementById('login-screen').classList.remove('hidden');
                 systemConfig.init();
+                swipeUnlock.init();
             }, 2000);
         };
 
@@ -3663,14 +6019,7 @@
 
         function checkLogin(e) {
             if (e.key === 'Enter') {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('desktop').classList.remove('hidden');
-                document.getElementById('desktop').classList.add('fade-in');
-                ipcRenderer.send("login-success")
-
-                updateClock();
-
-                notifications.show('Welcome back, Developer.', 'success');
+                attemptUnlock({ viaSwipe: false });
             }
         }
 
@@ -3679,9 +6028,104 @@
         })
 
         function unlockDesktop() {
+            resetLoginScreen();
             document.getElementById("login-screen").classList.add("hidden")
             document.getElementById("desktop").classList.remove("hidden")
+            document.getElementById("desktop").classList.add("fade-in")
         }
+
+        function resetLoginScreen() {
+            const loginScreen = document.getElementById('login-screen');
+            const loginCard = document.querySelector('.login-card');
+            if (loginScreen) {
+                loginScreen.classList.remove('swiping', 'swipe-armed');
+                loginScreen.style.transform = '';
+                loginScreen.style.opacity = '';
+            }
+            if (loginCard) {
+                loginCard.style.transform = '';
+            }
+            const input = document.getElementById('password-input');
+            if (input) input.value = '';
+        }
+
+        function attemptUnlock({ viaSwipe }) {
+            const input = document.getElementById('password-input');
+            const entered = input ? input.value.trim() : '';
+            const passwordEnabled = systemConfig?.state?.passwordEnabled;
+
+            if (viaSwipe && passwordEnabled) {
+                notifications.show('Password required. Enter it to unlock.', 'warning');
+                resetLoginScreen();
+                return;
+            }
+
+            if (passwordEnabled) {
+                if (!systemConfig.state.passwordValue || entered !== systemConfig.state.passwordValue) {
+                    notifications.show('Incorrect password.', 'danger');
+                    if (input) input.value = '';
+                    return;
+                }
+            } else if (entered.toLowerCase() === 'spiderpunk') {
+                themeManager.setTheme('spiderpunk');
+                notifications.show('Spiderpunk mode unlocked.', 'success');
+            }
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('desktop').classList.remove('hidden');
+            document.getElementById('desktop').classList.add('fade-in');
+            ipcRenderer.send("login-success");
+
+            updateClock();
+
+            resetLoginScreen();
+            notifications.show('Welcome back, Developer.', 'success');
+        }
+
+        const swipeUnlock = {
+            active: false,
+            startY: 0,
+            currentY: 0,
+            threshold: 180,
+            init: () => {
+                const loginScreen = document.getElementById('login-screen');
+                if (!loginScreen) return;
+
+                loginScreen.addEventListener('mousedown', (event) => {
+                    if (!systemConfig?.state?.swipeToUnlock) return;
+                    if (event.button !== 0) return;
+                    if (event.target.closest('input') || event.target.closest('button')) return;
+                    swipeUnlock.active = true;
+                    swipeUnlock.startY = event.clientY;
+                    swipeUnlock.currentY = event.clientY;
+                    loginScreen.classList.add('swiping', 'swipe-armed');
+                });
+
+                document.addEventListener('mousemove', (event) => {
+                    if (!swipeUnlock.active) return;
+                    swipeUnlock.currentY = event.clientY;
+                    const delta = Math.min(0, swipeUnlock.currentY - swipeUnlock.startY);
+                    const loginCard = document.querySelector('.login-card');
+                    loginScreen.style.transform = `translateY(${delta}px)`;
+                    loginScreen.style.opacity = `${1 + delta / 300}`;
+                    if (loginCard) {
+                        loginCard.style.transform = `translateY(${delta * 0.6}px)`;
+                    }
+                });
+
+                document.addEventListener('mouseup', () => {
+                    if (!swipeUnlock.active) return;
+                    swipeUnlock.active = false;
+                    const delta = swipeUnlock.currentY - swipeUnlock.startY;
+                    const shouldUnlock = Math.abs(delta) > swipeUnlock.threshold && delta < 0;
+                    if (shouldUnlock) {
+                        attemptUnlock({ viaSwipe: true });
+                    } else {
+                        resetLoginScreen();
+                    }
+                });
+            }
+        };
 
         /* --- NEW FEATURES LOGIC --- */
 
@@ -3746,7 +6190,8 @@
             'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop', // Original
             'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop', // Space
             'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop', // Cyberpunk
-            'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop' // Abstract
+            'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop', // Abstract
+            'spiderpunk.jpg' // Spiderpunk
         ];
         let wpIndex = 0;
 
@@ -4092,11 +6537,11 @@
                         // This is advanced, but we try to force the webview to use the device
                         // by executing setSinkId on its internal media elements
                         browser.executeJavaScript(`
-                            navigator.mediaDevices.enumerateDevices().then(devs => {
-                                const audio = document.querySelectorAll('audio, video');
-                                audio.forEach(a => a.setSinkId('${deviceId}').catch(e => console.log(e)));
-                            });
-                         `);
+                                    navigator.mediaDevices.enumerateDevices().then(devs => {
+                                        const audio = document.querySelectorAll('audio, video');
+                                        audio.forEach(a => a.setSinkId('${deviceId}').catch(e => console.log(e)));
+                                    });
+                                 `);
                     }
 
                     notifications.show("Audio Output Switched", "success");
@@ -4118,8 +6563,8 @@
                     browser.setAudioMuted(val == 0);
                     // Webview doesn't have a direct setVolume, so we inject JS
                     browser.executeJavaScript(`
-                        document.querySelectorAll('audio, video').forEach(el => el.volume = ${volume});
-                    `);
+                                document.querySelectorAll('audio, video').forEach(el => el.volume = ${volume});
+                            `);
                 }
             }
         };
