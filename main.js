@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, systemPreferences } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const { session } = require("electron")
@@ -21,6 +21,13 @@ ipcMain.handle("get-auth-state", () => {
     return isLoggedIn
 })
 
+app.whenReady().then(async () => {
+    if (process.platform === 'darwin') {
+        await systemPreferences.askForMediaAccess('camera');
+        await systemPreferences.askForMediaAccess('microphone');
+    }
+});
+
 function createWindows() {
     const displays = screen.getAllDisplays()
 
@@ -38,9 +45,11 @@ function createWindows() {
             hasShadow: true,
             backgroundColor: "#000",
             webPreferences: {
+                preload: path.join(__dirname, 'preload.js'),
                 nodeIntegration: true,
                 contextIsolation: false,
                 webviewTag: true,
+                sandbox: false,
             }
         })
 
@@ -159,6 +168,66 @@ function runInstaller() {
 // --- FILE SYSTEM API ---
 
 
+// --- ADD THIS TO main.js (Inside the main logic, before the end) ---
+
+// --- PHOTOS API ---
+
+ipcMain.handle('photos-get-library', async () => {
+    try {
+        const picPath = app.getPath('pictures');
+
+        if (!fs.existsSync(picPath)) {
+            return { error: "Pictures folder not found", path: picPath };
+        }
+
+        const files = fs.readdirSync(picPath, { withFileTypes: true });
+
+        const images = files
+            .filter(f => f.isFile())
+            .filter(f => {
+                const ext = path.extname(f.name).toLowerCase();
+                return ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
+            })
+            .map(f => {
+                const fullPath = path.join(picPath, f.name);
+                return {
+                    name: f.name,
+                    path: fullPath,
+                    src: `file://${fullPath.replace(/\\/g, '/')}`
+                };
+            });
+
+        return { path: picPath, images };
+    } catch (e) {
+        return { error: e.message };
+    }
+});
+
+/* ---------------- PHOTOS: SAVE CAMERA CAPTURE ---------------- */
+
+ipcMain.handle('photos-save-capture', async (_, { base64Data }) => {
+    try {
+        const basePath = app.getPath('pictures');
+        const captureDir = path.join(basePath, 'CoreOS_Captures');
+
+        if (!fs.existsSync(captureDir)) {
+            fs.mkdirSync(captureDir, { recursive: true });
+        }
+
+        const base64 = base64Data.replace(/^data:image\/png;base64,/, '');
+        const fileName = `Capture_${Date.now()}.png`;
+        const fullPath = path.join(captureDir, fileName);
+
+        fs.writeFileSync(fullPath, base64, 'base64');
+
+        return { success: true, path: fullPath };
+    } catch (e) {
+        return { error: e.message };
+    }
+});
+
+// --- FILE SYSTEM API ---
+
 // 3. Create Folder
 ipcMain.handle('fs-create-folder', async (event, folderPath) => {
     try {
@@ -166,7 +235,7 @@ ipcMain.handle('fs-create-folder', async (event, folderPath) => {
             fs.mkdirSync(folderPath);
             return { success: true };
         }
-        return { error: "Folder already exists" };
+        return { error: "Folder exists" };
     } catch (e) { return { error: e.message }; }
 });
 
@@ -177,16 +246,14 @@ ipcMain.handle('fs-create-file', async (event, filePath, content = '') => {
             fs.writeFileSync(filePath, content);
             return { success: true };
         }
-        return { error: "File already exists" };
+        return { error: "File exists" };
     } catch (e) { return { error: e.message }; }
 });
 
 // 5. Delete File/Folder (Used for cleaning up if needed, though mostly we just delete shortcuts)
 ipcMain.handle('fs-delete', async (event, targetPath) => {
     try {
-        // Simple protection to prevent deleting root/home by accident
-        if (targetPath === os.homedir() || targetPath === path.parse(process.cwd()).root) return { error: "Protected Path" };
-
+        if (targetPath === os.homedir() || targetPath === path.parse(process.cwd()).root) return { error: "Protected" };
         fs.rmSync(targetPath, { recursive: true, force: true });
         return { success: true };
     } catch (e) { return { error: e.message }; }
@@ -236,29 +303,60 @@ app.on('activate', () => {
 // --- FILE SYSTEM & DOWNLOAD HANDLERS ---
 
 // 1. Handle File System Requests
+// --- FILE SYSTEM HANDLERS ---
+
 ipcMain.handle('fs-read-dir', async (event, dirPath) => {
     try {
+        // Handle the virtual "__ROOT__" path
         if (dirPath === "__ROOT__") {
             const drives = [];
-            for (let i = 65; i <= 90; i++) {
-                const drive = String.fromCharCode(i) + ":\\";
-                if (fs.existsSync(drive)) {
-                    drives.push({
-                        name: drive,
-                        isDirectory: true,
-                        path: drive,
-                        size: 0,
-                        mtime: null
+
+            if (process.platform === 'win32') {
+                // Windows: Enumerate Drive Letters
+                for (let i = 65; i <= 90; i++) {
+                    const drive = String.fromCharCode(i) + ":\\";
+                    // Using try/catch check accessSync is more reliable than existsSync for drives
+                    try {
+                        fs.accessSync(drive);
+                        drives.push({ name: `Local Disk (${drive})`, isDirectory: true, path: drive });
+                    } catch (e) { }
+                }
+            } else {
+                // macOS / Linux: Return Root and mounted Volumes
+                drives.push({ name: "Macintosh HD", isDirectory: true, path: "/" });
+
+                // Optional: Check /Volumes for external drives on Mac
+                if (process.platform === 'darwin' && fs.existsSync('/Volumes')) {
+                    const volumes = fs.readdirSync('/Volumes');
+                    volumes.forEach(vol => {
+                        // Skip aliases/hidden if necessary, simplified here
+                        if (!vol.startsWith('.')) {
+                            drives.push({
+                                name: vol,
+                                isDirectory: true,
+                                path: path.join('/Volumes', vol)
+                            });
+                        }
                     });
                 }
             }
             return { path: "__ROOT__", files: drives };
         }
 
-        const resolvedPath = dirPath && dirPath.trim() ? dirPath : os.homedir();
+        // Resolve normal paths
+        // On Mac/Linux, if dirPath is empty/null, default to Home
+        let resolvedPath = dirPath && dirPath.trim() ? dirPath : os.homedir();
+
+        // Ensure directory exists
+        if (!fs.existsSync(resolvedPath)) {
+            return { error: "Path does not exist" };
+        }
+
+        // Read directory contents
         const entries = fs.readdirSync(resolvedPath, { withFileTypes: true });
 
         const files = entries.map(entry => {
+            // path.join handles forward/backslashes correctly based on OS
             const fullPath = path.join(resolvedPath, entry.name);
             let stats = {};
             try { stats = fs.statSync(fullPath); } catch { }
@@ -272,21 +370,30 @@ ipcMain.handle('fs-read-dir', async (event, dirPath) => {
             };
         });
 
+        // Sort: Folders first, then Files
         files.sort((a, b) => {
-            if (a.isDirectory === b.isDirectory) return a.name.localeCompare(b.name);
+            if (a.isDirectory === b.isDirectory) {
+                return a.name.localeCompare(b.name);
+            }
             return a.isDirectory ? -1 : 1;
         });
 
-        return { path: resolvedPath, files };
+        // Filter out hidden system files (optional, keeps UI clean)
+        const visibleFiles = files.filter(f => !f.name.startsWith('.'));
+
+        return { path: resolvedPath, files: visibleFiles };
     } catch (e) {
+        console.error(e);
         return { error: e.message };
     }
 });
 
 ipcMain.handle("fs-special-paths", () => {
     return {
+        // Root is virtual
         root: "__ROOT__",
-        home: os.homedir(),
+        // Electron automatically detects the correct OS paths
+        home: app.getPath("home"),
         downloads: app.getPath("downloads"),
         documents: app.getPath("documents"),
         desktop: app.getPath("desktop")
@@ -295,10 +402,26 @@ ipcMain.handle("fs-special-paths", () => {
 
 // 2. Open File (Launch in default OS app)
 ipcMain.handle('fs-open', async (event, filePath) => {
+    // Basic safety check for Windows executables on non-Windows
     if (path.extname(filePath).toLowerCase() === ".exe" && process.platform !== "win32") {
         return "Executable files (.exe) can only be run on Windows hosts.";
     }
-    return shell.openPath(filePath);
+
+    // shell.openPath works on macOS (.app, .pdf, .png, etc.) and Windows
+    const result = await shell.openPath(filePath);
+
+    if (result) {
+        // result contains an error string if something failed
+        return result;
+    }
+    return null; // Success
+});
+
+// --- SHUTDOWN HANDLER ---
+ipcMain.on('system-shutdown', () => {
+    setTimeout(() => {
+        app.quit();
+    }, 2000); // Wait for animation
 });
 
 // 3. Handle Downloads from the Browser App
